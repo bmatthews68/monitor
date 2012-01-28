@@ -14,8 +14,28 @@
  * limitations under the License.
  */
 
-/**
- * This package contains the classes that implement a simple monitor for controlling server processes.
- */
 package com.btmatthews.utils.monitor;
 
+/**
+ * This interface is implemented by factories that create server objects that
+ * can be controlled by a monitor.
+ * 
+ * @author <a href="mailto:brian@btmatthews.com">Brian Matthews</a>
+ * @since 1.0.0
+ */
+public interface ServerFactory {
+
+    /**
+     * Get the server name,
+     * 
+     * @return The server name.
+     */
+    String getServerName();
+
+    /**
+     * Create a server object.
+     * 
+     * @return The newly created server object.
+     */
+    Server createServer();
+}
