@@ -14,30 +14,18 @@
  * limitations under the License.
  */
 
-package com.btmatthews.utils.monitor;
+package com.btmatthews.utils.monitor.test;
 
-/**
- * This interface is implemented by server objects that can be controlled by a
- * monitor.
- * 
- * @author <a href="mailto:brian@btmatthews.com">Brian Matthews</a>
- * @since 1.0.0
- */
-public interface Server {
+import com.btmatthews.utils.monitor.Server;
+import com.btmatthews.utils.monitor.ServerFactory;
 
-    /**
-     * Start the server.
-     * 
-     * @param logger
-     *            Used to log error messages.
-     */
-    void start(Logger logger);
+public class DummyServerFactory implements ServerFactory {
 
-    /**
-     * Stop the server.
-     * 
-     * @param logger
-     *            Used to log error messages.
-     */
-    void stop(Logger logger);
+    public String getServerName() {
+	return "Dummy";
+    }
+
+    public Server createServer() {
+	return new DummyServer();
+    }
 }

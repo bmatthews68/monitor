@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Brian Matthews
+ * Copyright 2011-2012 Brian Matthews
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,31 +35,31 @@ import com.btmatthews.utils.monitor.Server;
  */
 public class TestMonitor {
 
-	/**
-	 * Verify that a monitor can be started and stopped successfully.
-	 */
-	@Test
-	public void testMonitor() throws InterruptedException {
-		final Server server = Mockito.mock(Server.class);
-		final Logger logger = Mockito.mock(Logger.class);
-		final Monitor monitor = new Monitor("greenMail", 10025);
-		final Thread monitorThread = new Thread(new Runnable() {
-			public void run() {
-				server.start(logger);
-				monitor.runMonitor(server, logger);
-			}
-		});
-		monitorThread.start();
-		final Timer timer = new Timer();
-		timer.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				monitor.sendCommand("stop", logger);
-			}
-		}, 5000L);
-		monitorThread.join(10000L);
-		Mockito.verify(server).start(Matchers.same(logger));
-		Mockito.verify(server).stop(Matchers.same(logger));
-		Mockito.validateMockitoUsage();
-	}
+    /**
+     * Verify that a monitor can be started and stopped successfully.
+     */
+    @Test
+    public void testMonitor() throws InterruptedException {
+	final Server server = Mockito.mock(Server.class);
+	final Logger logger = Mockito.mock(Logger.class);
+	final Monitor monitor = new Monitor("test", 10025);
+	final Thread monitorThread = new Thread(new Runnable() {
+	    public void run() {
+		server.start(logger);
+		monitor.runMonitor(server, logger);
+	    }
+	});
+	monitorThread.start();
+	final Timer timer = new Timer();
+	timer.schedule(new TimerTask() {
+	    @Override
+	    public void run() {
+		monitor.sendCommand("stop", logger);
+	    }
+	}, 5000L);
+	monitorThread.join(10000L);
+	Mockito.verify(server).start(Matchers.same(logger));
+	Mockito.verify(server).stop(Matchers.same(logger));
+	Mockito.validateMockitoUsage();
+    }
 }

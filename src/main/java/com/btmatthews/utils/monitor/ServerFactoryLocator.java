@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -82,6 +83,8 @@ public class ServerFactoryLocator {
      * 
      * @param url
      *            The location of the service file.
+     * @param logger
+     *            Used to log errors.
      * @throws IOException
      *             If there was a problem loading the service file.
      */
@@ -95,6 +98,17 @@ public class ServerFactoryLocator {
 	}
     }
 
+    /**
+     * Load all the server factories from the service file accessed via the
+     * input stream {@code inputStream}.
+     * 
+     * @param inputStream
+     *            The input stream.
+     * @param logger
+     *            Used to log errors.
+     * @throws IOException
+     *             If there was a problem loading the input stream.
+     */
     @SuppressWarnings("unchecked")
     private void loadServerFactories(final InputStream inputStream,
 	    final Logger logger) throws IOException {
@@ -111,11 +125,19 @@ public class ServerFactoryLocator {
 		    serverFactoryMapping.put(serverFactory.getServerName(),
 			    serverFactory);
 		} catch (final ClassNotFoundException e) {
-		    logger.logError("", e);
+		    final String message = MessageFormat.format(
+			    "Class {0} not found", serverFactoryClassName);
+		    logger.logError(message, e);
 		} catch (final IllegalAccessException e) {
-		    logger.logError("", e);
+		    final String message = MessageFormat.format(
+			    "Cannot access class {0} or its constructor",
+			    serverFactoryClassName);
+		    logger.logError(message, e);
 		} catch (final InstantiationException e) {
-		    logger.logError("", e);
+		    final String message = MessageFormat.format(
+			    "Class {0} cannot be instantiated",
+			    serverFactoryClassName);
+		    logger.logError(message, e);
 		}
 	    }
 	    serverFactoryClassName = reader.readLine();

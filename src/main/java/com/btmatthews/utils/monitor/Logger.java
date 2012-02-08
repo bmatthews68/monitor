@@ -25,29 +25,29 @@ package com.btmatthews.utils.monitor;
  */
 public interface Logger {
 
-	/**
-	 * Write an information message to the log file.
-	 * 
-	 * @param message
-	 *            The information message.
-	 */
-	void logInfo(String message);
+    /**
+     * Write an information message to the log file.
+     * 
+     * @param message
+     *            The information message.
+     */
+    void logInfo(String message);
 
-	/**
-	 * Write an error message to the log file.
-	 * 
-	 * @param message
-	 *            The error message.
-	 */
-	void logError(String message);
+    /**
+     * Write an error message to the log file.
+     * 
+     * @param message
+     *            The error message.
+     */
+    void logError(String message);
 
-	/**
-	 * Write an error message to the log file.
-	 * 
-	 * @param message
-	 *            The error message.
-	 * @param cause
-	 *            The exception that is associated with the error message.
-	 */
-	void logError(String message, Throwable cause);
+    /**
+     * Write an error message to the log file.
+     * 
+     * @param message
+     *            The error message.
+     * @param cause
+     *            The exception that is associated with the error message.
+     */
+    void logError(String message, Throwable cause);
 }
