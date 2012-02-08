@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pmd version="4.2.5" timestamp="2012-02-08T02:09:58.464">
+<file name="D:\github\monitor\target\checkout\src\main\java\com\btmatthews\utils\monitor\Monitor.java">
+<violation beginline="43" endline="43" begincolumn="45" endcolumn="55" rule="AvoidUsingHardCodedIP" ruleset="Basic Rules" package="com.btmatthews.utils.monitor" class="Monitor" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#AvoidUsingHardCodedIP" priority="3">
+Do not hard code IPv4 or IPv6 addresses, even 127.0.0.1 !
+</violation>
+</file>
+</pmd>
