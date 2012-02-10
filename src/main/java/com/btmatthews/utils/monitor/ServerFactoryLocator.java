@@ -33,12 +33,12 @@ import java.util.Map;
  * @author <a href="mailto:brian@btmatthews.com">Brian Matthews</a>
  * @since 1.0.0
  */
-public class ServerFactoryLocator {
+public final class ServerFactoryLocator {
 
     /**
      * The singleton instance of the locator.
      */
-    private static ServerFactoryLocator INSTANCE;
+    private static ServerFactoryLocator instance;
 
     /**
      * Registered factories keyed by their server name.
@@ -49,18 +49,23 @@ public class ServerFactoryLocator {
      * Get the singleton instance of the locator. If the singleton has not
      * already been created it will be created and initialised as a side-effect.
      * 
+     * @param logger
+     *            Used to report status and error messages.
      * @return The singleton instance of the locator.
      */
     public static ServerFactoryLocator getInstance(final Logger logger) {
-	if (INSTANCE == null) {
-	    INSTANCE = new ServerFactoryLocator(logger);
+	if (instance == null) {
+	    instance = new ServerFactoryLocator(logger);
 	}
-	return INSTANCE;
+	return instance;
     }
 
     /**
      * The constructor that scans the classpath and registers all available
      * factory objects.
+     * 
+     * @param logger
+     *            Used to report status and error messages.
      */
     private ServerFactoryLocator(final Logger logger) {
 	try {
@@ -73,7 +78,9 @@ public class ServerFactoryLocator {
 		loadServerFactories(resourceUrl, logger);
 	    }
 	} catch (final IOException e) {
-	    logger.logError("", e);
+	    logger.logError(
+		    "Error loading META-INF/service/com.btmatthews.utils.monitor.ServerFactory",
+		    e);
 	}
     }
 
@@ -84,7 +91,7 @@ public class ServerFactoryLocator {
      * @param url
      *            The location of the service file.
      * @param logger
-     *            Used to log errors.
+     *            Used to report status and error messages.
      * @throws IOException
      *             If there was a problem loading the service file.
      */
@@ -105,7 +112,7 @@ public class ServerFactoryLocator {
      * @param inputStream
      *            The input stream.
      * @param logger
-     *            Used to log errors.
+     *            Used to report status and error messages.
      * @throws IOException
      *             If there was a problem loading the input stream.
      */

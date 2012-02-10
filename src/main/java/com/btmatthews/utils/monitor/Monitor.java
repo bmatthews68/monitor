@@ -35,12 +35,7 @@ import java.net.Socket;
  * @author <a href="mailto:brian@btmatthews.com">Brian Matthews</a>
  * @since 1.0.0
  */
-public class Monitor {
-
-    /**
-     * The IP address of the localhost.
-     */
-    private static final String LOCALHOST = "127.0.0.1";
+public final class Monitor {
 
     /**
      * The monitor key that must prefix any commands.
@@ -86,7 +81,7 @@ public class Monitor {
     public void runMonitor(final Server server, final Logger logger) {
 	try {
 	    final ServerSocket serverSocket = new ServerSocket(monitorPort, 1,
-		    InetAddress.getByName(LOCALHOST));
+		    InetAddress.getLocalHost());
 	    try {
 		serverSocket.setReuseAddress(true);
 		running = true;
@@ -140,7 +135,7 @@ public class Monitor {
      */
     public void sendCommand(final String command, final Logger logger) {
 	try {
-	    final Socket socket = new Socket(InetAddress.getByName(LOCALHOST),
+	    final Socket socket = new Socket(InetAddress.getLocalHost(),
 		    monitorPort);
 	    try {
 		socket.setSoLinger(false, 0);

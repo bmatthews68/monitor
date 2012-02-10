@@ -26,7 +26,7 @@ package com.btmatthews.utils.monitor;
 public interface ServerFactory {
 
     /**
-     * Get the server name,
+     * Get the server name.
      * 
      * @return The server name.
      */

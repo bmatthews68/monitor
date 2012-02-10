@@ -19,12 +19,31 @@ package com.btmatthews.utils.monitor.test;
 import com.btmatthews.utils.monitor.Server;
 import com.btmatthews.utils.monitor.ServerFactory;
 
+/**
+ * Implements the factory that creates the dummy server.
+ * 
+ * @author <a href="mailto:brian@btmatthews.com">Brian Matthews</a>
+ * @version 1.0.0
+ * 
+ */
 public class DummyServerFactory implements ServerFactory {
 
+    /**
+     * Returns the name of the dummy server.
+     * 
+     * @return Always returns {@code "Dummy"}.
+     * @see com.btmatthews.utils.monitor.ServerFactory#getServerName()
+     */
     public String getServerName() {
 	return "Dummy";
     }
 
+    /**
+     * Creates an instance of the dummy server.
+     * 
+     * @return An instance of {@link DummyServer}.
+     * @see com.btmatthews.utils.monitor.ServerFactory#createServer()
+     */
     public Server createServer() {
 	return new DummyServer();
     }

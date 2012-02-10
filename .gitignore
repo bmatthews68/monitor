@@ -3,3 +3,5 @@
 /.classpath
 /.checkstyle
 /.project
+/pom.xml.releaseBackup
+/release.properties
