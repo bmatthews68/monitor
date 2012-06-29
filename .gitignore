@@ -3,5 +3,7 @@
 /.classpath
 /.checkstyle
 /.project
+/.idea
+/monitor.iml
 /pom.xml.releaseBackup
 /release.properties
