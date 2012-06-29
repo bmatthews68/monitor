@@ -19,25 +19,49 @@ package com.btmatthews.utils.monitor;
 /**
  * This interface is implemented by server objects that can be controlled by a
  * monitor.
- * 
+ *
  * @author <a href="mailto:brian@btmatthews.com">Brian Matthews</a>
  * @since 1.0.0
  */
 public interface Server {
 
     /**
+     * Configure the a server property.
+     *
+     * @param name   The property name.
+     * @param value  The property value.
+     * @param logger Used to log error messages.
+     * @since 1.1.0
+     */
+    void configure(String name, String value, Logger logger);
+
+    /**
      * Start the server.
-     * 
-     * @param logger
-     *            Used to log error messages.
+     *
+     * @param logger Used to log error messages.
      */
     void start(Logger logger);
 
     /**
+     * Pause the server.
+     *
+     * @param logger Used to log error messages.
+     * @since 1.1.0
+     */
+    void pause(Logger logger);
+
+    /**
+     * Resume the server.
+     *
+     * @param logger Used to log error messages.
+     * @since 1.1.0
+     */
+    void resume(Logger logger);
+
+    /**
      * Stop the server.
-     * 
-     * @param logger
-     *            Used to log error messages.
+     *
+     * @param logger Used to log error messages.
      */
     void stop(Logger logger);
 }

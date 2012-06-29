@@ -4,22 +4,21 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import com.btmatthews.utils.monitor.Logger;
+import com.btmatthews.utils.monitor.ServerFactory;
+import com.btmatthews.utils.monitor.ServerFactoryLocator;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
-import com.btmatthews.utils.monitor.Logger;
-import com.btmatthews.utils.monitor.ServerFactory;
-import com.btmatthews.utils.monitor.ServerFactoryLocator;
-
 /**
  * Unit test the server factory locator.
- * 
+ *
  * @author <a href="mailto:brian@btmatthews.com">Brian Matthews</a>
  * @version 1.0.0
  */
 public class TestServerFactoryLocator {
-    
+
     /**
      * The dummy server name.
      */
@@ -36,7 +35,7 @@ public class TestServerFactoryLocator {
      */
     @Before
     public void setUp() {
-	initMocks(this);
+        initMocks(this);
     }
 
     /**
@@ -45,14 +44,14 @@ public class TestServerFactoryLocator {
      */
     @Test
     public void testServerFactoryLocator() {
-	final ServerFactoryLocator serverFactoryLocator = ServerFactoryLocator
-		.getInstance(logger);
-	assertNotNull(serverFactoryLocator);
+        final ServerFactoryLocator serverFactoryLocator = ServerFactoryLocator
+                .getInstance(logger);
+        assertNotNull(serverFactoryLocator);
 
-	final ServerFactory serverFactory = serverFactoryLocator
-		.getFactory(DUMMY_SERVER_NAME);
-	assertNotNull(serverFactory);
-	assertEquals(DUMMY_SERVER_NAME, serverFactory.getServerName());
-	assertNotNull(serverFactory.createServer());
+        final ServerFactory serverFactory = serverFactoryLocator
+                .getFactory(DUMMY_SERVER_NAME);
+        assertNotNull(serverFactory);
+        assertEquals(DUMMY_SERVER_NAME, serverFactory.getServerName());
+        assertNotNull(serverFactory.createServer());
     }
 }

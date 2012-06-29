@@ -19,17 +19,16 @@ package com.btmatthews.utils.monitor.test;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.btmatthews.utils.monitor.Logger;
+import com.btmatthews.utils.monitor.Monitor;
+import com.btmatthews.utils.monitor.Server;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 
-import com.btmatthews.utils.monitor.Logger;
-import com.btmatthews.utils.monitor.Monitor;
-import com.btmatthews.utils.monitor.Server;
-
 /**
  * Unit test the monitor.
- * 
+ *
  * @author <a href="mailto:brian@btmatthews.com">Brian Matthews</a>
  * @version 1.0.0
  */
@@ -40,26 +39,26 @@ public class TestMonitor {
      */
     @Test
     public void testMonitor() throws InterruptedException {
-	final Server server = Mockito.mock(Server.class);
-	final Logger logger = Mockito.mock(Logger.class);
-	final Monitor monitor = new Monitor("test", 10025);
-	final Thread monitorThread = new Thread(new Runnable() {
-	    public void run() {
-		server.start(logger);
-		monitor.runMonitor(server, logger);
-	    }
-	});
-	monitorThread.start();
-	final Timer timer = new Timer();
-	timer.schedule(new TimerTask() {
-	    @Override
-	    public void run() {
-		monitor.sendCommand("stop", logger);
-	    }
-	}, 5000L);
-	monitorThread.join(10000L);
-	Mockito.verify(server).start(Matchers.same(logger));
-	Mockito.verify(server).stop(Matchers.same(logger));
-	Mockito.validateMockitoUsage();
+        final Server server = Mockito.mock(Server.class);
+        final Logger logger = Mockito.mock(Logger.class);
+        final Monitor monitor = new Monitor("test", 10025);
+        final Thread monitorThread = new Thread(new Runnable() {
+            public void run() {
+                server.start(logger);
+                monitor.runMonitor(server, logger);
+            }
+        });
+        monitorThread.start();
+        final Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                monitor.sendCommand("stop", logger);
+            }
+        }, 5000L);
+        monitorThread.join(10000L);
+        Mockito.verify(server).start(Matchers.same(logger));
+        Mockito.verify(server).stop(Matchers.same(logger));
+        Mockito.validateMockitoUsage();
     }
 }
