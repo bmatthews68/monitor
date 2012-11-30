@@ -33,7 +33,7 @@ public interface Server {
      * @param logger Used to log error messages.
      * @since 1.1.0
      */
-    void configure(String name, String value, Logger logger);
+    void configure(String name, Object value, Logger logger);
 
     /**
      * Start the server.

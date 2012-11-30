@@ -14,30 +14,29 @@
  * limitations under the License.
  */
 
-package com.btmatthews.utils.monitor;
+package com.btmatthews.utils.monitor.mojo;
 
-import java.util.Map;
+import com.btmatthews.utils.monitor.Monitor;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
 
 /**
- * This interface is implemented by factories that create server objects that
- * can be controlled by a monitor.
- *
  * @author <a href="mailto:brian@btmatthews.com">Brian Matthews</a>
- * @since 1.0.0
+ * @since 1.1.0
  */
-public interface ServerFactory {
+@Mojo(name = "stop")
+public class StopMojo extends AbstractServerMojo {
 
     /**
-     * Get the server name.
+     * Stop a running an embedded server by sending a {@code stop} command to the monitor that is controlling that
+     * server.
      *
-     * @return The server name.
+     * @throws org.apache.maven.plugin.MojoFailureException
+     *          If there was an error stopping the embedded server.
      */
-    String getServerName();
-
-    /**
-     * Create a server object.
-     *
-     * @return The newly created server object.
-     */
-    Server createServer();
+    @Override
+    public void execute() throws MojoFailureException {
+        final Monitor monitor = createMonitor();
+        monitor.sendCommand("stop", this);
+    }
 }

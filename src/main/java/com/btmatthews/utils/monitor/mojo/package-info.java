@@ -14,30 +14,9 @@
  * limitations under the License.
  */
 
-package com.btmatthews.utils.monitor;
-
-import java.util.Map;
-
 /**
- * This interface is implemented by factories that create server objects that
- * can be controlled by a monitor.
- *
- * @author <a href="mailto:brian@btmatthews.com">Brian Matthews</a>
- * @since 1.0.0
+ * This package contains the classes that implement a abstract base classes for Mojos that utilise the Monitor
+ * framework.
  */
-public interface ServerFactory {
+package com.btmatthews.utils.monitor.mojo;
 
-    /**
-     * Get the server name.
-     *
-     * @return The server name.
-     */
-    String getServerName();
-
-    /**
-     * Create a server object.
-     *
-     * @return The newly created server object.
-     */
-    Server createServer();
-}
