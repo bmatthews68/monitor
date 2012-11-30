@@ -16,6 +16,8 @@
 
 package com.btmatthews.utils.monitor.test;
 
+import java.util.Map;
+
 import com.btmatthews.utils.monitor.Server;
 import com.btmatthews.utils.monitor.ServerFactory;
 
@@ -31,8 +33,9 @@ public class DummyServerFactory implements ServerFactory {
      * Returns the name of the dummy server.
      *
      * @return Always returns {@code "Dummy"}.
-     * @see com.btmatthews.utils.monitor.ServerFactory#getServerName()
+     * @see ServerFactory#getServerName()
      */
+    @Override
     public String getServerName() {
         return "Dummy";
     }
@@ -41,8 +44,9 @@ public class DummyServerFactory implements ServerFactory {
      * Creates an instance of the dummy server.
      *
      * @return An instance of {@link DummyServer}.
-     * @see com.btmatthews.utils.monitor.ServerFactory#createServer()
+     * @see ServerFactory#createServer()
      */
+    @Override
     public Server createServer() {
         return new DummyServer();
     }
