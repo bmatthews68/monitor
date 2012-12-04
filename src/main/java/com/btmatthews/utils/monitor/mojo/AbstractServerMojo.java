@@ -22,6 +22,8 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
 /**
+ * Abstract base class for mojos that implement the stop and run goals for plug-ins that use the Monitor framework.
+ *
  * @author <a href="mailto:brian@btmatthews.com">Brian Matthews</a>
  * @since 1.1.0
  */
@@ -44,7 +46,7 @@ public abstract class AbstractServerMojo extends AbstractMojo implements Logger 
      *
      * @return A {@link Monitor} object.
      */
-    protected final Monitor createMonitor() {
+    public Monitor createMonitor() {
         return new Monitor(monitorKey, monitorPort);
     }
 
@@ -54,7 +56,7 @@ public abstract class AbstractServerMojo extends AbstractMojo implements Logger 
      * @param message The message to be logged.
      */
     @Override
-    public final void logInfo(final String message) {
+    public void logInfo(final String message) {
         getLog().info(message);
     }
 
@@ -64,7 +66,7 @@ public abstract class AbstractServerMojo extends AbstractMojo implements Logger 
      * @param message The message to be logged.
      */
     @Override
-    public final void logError(final String message) {
+    public void logError(final String message) {
         getLog().error(message);
     }
 
@@ -75,7 +77,7 @@ public abstract class AbstractServerMojo extends AbstractMojo implements Logger 
      * @param cause   The exception that caused the message to be logged.
      */
     @Override
-    public final void logError(final String message, final Throwable cause) {
+    public void logError(final String message, final Throwable cause) {
         getLog().error(message, cause);
     }
 }

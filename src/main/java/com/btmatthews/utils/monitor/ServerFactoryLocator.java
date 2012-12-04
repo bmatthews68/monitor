@@ -54,7 +54,8 @@ public final class ServerFactoryLocator {
      */
     public static ServerFactoryLocator getInstance(final Logger logger) {
         if (instance == null) {
-            instance = new ServerFactoryLocator(logger);
+            instance = new ServerFactoryLocator();
+            instance.init(logger);
         }
         return instance;
     }
@@ -65,10 +66,9 @@ public final class ServerFactoryLocator {
      *
      * @param logger Used to report status and error messages.
      */
-    private ServerFactoryLocator(final Logger logger) {
+    private void init(final Logger logger) {
         try {
-            final ClassLoader classLoader = ServerFactoryLocator.class
-                    .getClassLoader();
+            final ClassLoader classLoader = ServerFactoryLocator.class.getClassLoader();
             final Enumeration<URL> resources = classLoader
                     .getResources("META-INF/service/com.btmatthews.utils.monitor.ServerFactory");
             while (resources.hasMoreElements()) {
@@ -76,9 +76,7 @@ public final class ServerFactoryLocator {
                 loadServerFactories(resourceUrl, logger);
             }
         } catch (final IOException e) {
-            logger.logError(
-                    "Error loading META-INF/service/com.btmatthews.utils.monitor.ServerFactory",
-                    e);
+            logger.logError("Error loading META-INF/service/com.btmatthews.utils.monitor.ServerFactory", e);
         }
     }
 
@@ -117,15 +115,11 @@ public final class ServerFactoryLocator {
         while (serverFactoryClassName != null) {
             if (serverFactoryClassName.length() > 0) {
                 try {
-                    final Class<ServerFactory> serverFactoryClass = (Class<ServerFactory>)Class
-                            .forName(serverFactoryClassName);
-                    final ServerFactory serverFactory = serverFactoryClass
-                            .newInstance();
-                    serverFactoryMapping.put(serverFactory.getServerName(),
-                            serverFactory);
+                    final Class<ServerFactory> serverFactoryClass = (Class<ServerFactory>)Class.forName(serverFactoryClassName);
+                    final ServerFactory serverFactory = serverFactoryClass.newInstance();
+                    serverFactoryMapping.put(serverFactory.getServerName(), serverFactory);
                 } catch (final ClassNotFoundException e) {
-                    final String message = MessageFormat.format(
-                            "Class {0} not found", serverFactoryClassName);
+                    final String message = MessageFormat.format("Class {0} not found", serverFactoryClassName);
                     logger.logError(message, e);
                 } catch (final IllegalAccessException e) {
                     final String message = MessageFormat.format(

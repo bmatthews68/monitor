@@ -16,10 +16,20 @@
 
 package com.btmatthews.utils.monitor;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The monitor object is used to control a server.
@@ -28,6 +38,16 @@ import java.net.Socket;
  * @since 1.0.0
  */
 public final class Monitor {
+
+    /**
+     * The regex for the configure command.
+     */
+    private static final Pattern CONFIGURE_PATTERN = Pattern.compile("configure\\s+(\\w+)=(.*)");
+
+    /**
+     * The stop command.
+     */
+    private static final String STOP = "stop";
 
     /**
      * The monitor key that must prefix any commands.
@@ -53,22 +73,43 @@ public final class Monitor {
     /**
      * Run the monitor listening for commands and sending them to the server.
      *
-     * @param server The server being monitored.
-     * @param logger Used to log error messages.
+     * @param server   The server being monitored.
+     * @param logger   Used to log error messages.
+     * @param observer Used to handle notifications for server start and stop.
      */
-    public void runMonitor(final Server server, final Logger logger) {
+    public void runMonitor(final Server server, final Logger logger, final MonitorObserver observer) {
         try {
-            final ServerSocket serverSocket = new ServerSocket(monitorPort, 1,
-                    InetAddress.getLocalHost());
+            final ServerSocket serverSocket = new ServerSocket(monitorPort, 1, InetAddress.getLocalHost());
             try {
                 serverSocket.setReuseAddress(true);
+                server.start(logger);
+                observer.started(server, logger);
                 runMonitorInternal(server, logger, serverSocket);
+                observer.stopped(server, logger);
             } finally {
                 serverSocket.close();
             }
         } catch (final IOException exception) {
             logger.logError("Error starting or stopping the monitor", exception);
         }
+    }
+
+    /**
+     * Spawn a thread used to run the monitor as daemon processes.
+     *
+     * @param server   The server.
+     * @param logger   Used to log information and error messages.
+     * @param observer Used to handle notifications for server start and stop.
+     * @return The thread that was spawned to run the monitor.
+     */
+    public Thread runMonitorDaemon(final Server server, final Logger logger, final MonitorObserver observer) {
+        final Thread monitorThread = new Thread(new Runnable() {
+            public void run() {
+                Monitor.this.runMonitor(server, logger, observer);
+            }
+        });
+        monitorThread.start();
+        return monitorThread;
     }
 
     /**
@@ -112,12 +153,9 @@ public final class Monitor {
      * @throws IOException If there was an error reading from the client socket connection.
      */
     private String getCommand(final Socket clientSocket, final Logger logger) throws IOException {
-        final InputStream inputStream = clientSocket
-                .getInputStream();
-        final Reader reader = new InputStreamReader(
-                inputStream);
-        final LineNumberReader lineReader = new LineNumberReader(
-                reader);
+        final InputStream inputStream = clientSocket.getInputStream();
+        final Reader reader = new InputStreamReader(inputStream);
+        final LineNumberReader lineReader = new LineNumberReader(reader);
         final String key = lineReader.readLine();
         if (monitorKey.equals(key)) {
             return lineReader.readLine();
@@ -128,6 +166,18 @@ public final class Monitor {
     }
 
     /**
+     * Static method used to send a command to a server via a monitor.
+     *
+     * @param key     The monitor key.
+     * @param port    The monitor port.
+     * @param command The command to be sent to the server.
+     * @param logger  Used to log information and error messages.
+     */
+    public static void sendCommand(final String key, final int port, final String command, final Logger logger) {
+        new Monitor(key, port).sendCommand(command, logger);
+    }
+
+    /**
      * Send a command to the monitor.
      *
      * @param command The command.
@@ -135,11 +185,10 @@ public final class Monitor {
      */
     public void sendCommand(final String command, final Logger logger) {
         try {
-            final Socket socket = new Socket(InetAddress.getLocalHost(),
-                    monitorPort);
+            logger.logInfo("Sending command \"" + command + "\" to monitor");
+            final Socket socket = new Socket(InetAddress.getLocalHost(), monitorPort);
             try {
                 socket.setSoLinger(false, 0);
-
                 final OutputStream outputStream = socket.getOutputStream();
                 final Writer writer = new OutputStreamWriter(outputStream);
                 final PrintWriter printWriter = new PrintWriter(writer);
@@ -161,8 +210,6 @@ public final class Monitor {
      * The following commands are supported:
      * <ul>
      * <li>configure name=value - Set the server property {@code name} to {@code value}</li>
-     * <li>pause - Pause the server</li>
-     * <li>resume - Resume the paused server</li>
      * <li>stop - Stop the server</li>
      * </ul>
      *
@@ -177,14 +224,10 @@ public final class Monitor {
      */
     private boolean executeCommand(final Server server, final String command,
                                    final Logger logger) {
-        if (command.startsWith("configure ")) {
-            final int split = command.indexOf('=', 10);
-            server.configure(command.substring(10, split), command.substring(split + 1), logger);
-        } else if ("pause".equals(command)) {
-            server.pause(logger);
-        } else if ("resume".equals(command)) {
-            server.resume(logger);
-        } else if ("stop".equals(command)) {
+        final Matcher matcher = CONFIGURE_PATTERN.matcher(command);
+        if (matcher.matches()) {
+            server.configure(matcher.group(1), matcher.group(2), logger);
+        } else if (STOP.equals(command)) {
             server.stop(logger);
             return false;
         }

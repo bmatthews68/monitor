@@ -18,7 +18,9 @@ package com.btmatthews.utils.monitor.mojo;
 
 import java.util.Map;
 
+import com.btmatthews.utils.monitor.Logger;
 import com.btmatthews.utils.monitor.Monitor;
+import com.btmatthews.utils.monitor.MonitorObserver;
 import com.btmatthews.utils.monitor.Server;
 import com.btmatthews.utils.monitor.ServerFactory;
 import com.btmatthews.utils.monitor.ServerFactoryLocator;
@@ -26,10 +28,12 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
 
 /**
+ * Abstract base class for mojos that implement the run goal for plug-ins that use the Monitor framework.
+ *
  * @author <a href="mailto:brian@btmatthews.com">Brian Matthews</a>
  * @since 1.1.0
  */
-public abstract class AbstractRunMojo extends AbstractServerMojo {
+public abstract class AbstractRunMojo extends AbstractServerMojo implements MonitorObserver {
 
     /**
      * If {@code true} the server is run as a daemon.
@@ -42,54 +46,66 @@ public abstract class AbstractRunMojo extends AbstractServerMojo {
      *
      * @return The server type name.
      */
-    protected abstract String getServerType();
+    public abstract String getServerType();
 
     /**
      * Get the configuration parameters for the server.
      *
      * @return A {@link Map} containing the configuration paramters.
      */
-    protected abstract Map<String, Object> getServerConfig();
+    public abstract Map<String, Object> getServerConfig();
 
     /**
      * This callback is called after the server has started.
+     *
+     * @param server The server that was started.
+     * @param logger Used to log information and error messages.
+     * @see MonitorObserver#started(com.btmatthews.utils.monitor.Server, com.btmatthews.utils.monitor.Logger)
      */
-    protected void started() {
+    @Override
+    public void started(final Server server, final Logger logger) {
     }
 
     /**
      * This callback is called after the server has exited.
+     *
+     * @param server The server that was stopped.
+     * @param logger Used to log information and error messages.
+     * @see MonitorObserver#stopped(com.btmatthews.utils.monitor.Server, com.btmatthews.utils.monitor.Logger)
      */
-    protected void stopped() {
+    @Override
+    public void stopped(final Server server, final Logger logger) {
     }
 
     /**
-     * Execute the Maven goal by creating a the server and then running it with the monitor.
+     * Execute the Maven goal by creating a the server, configuring it and then running it with the monitor.
      *
      * @throws MojoFailureException If there was an error executing the goal.
      */
     @Override
     public void execute() throws MojoFailureException {
-        final Monitor monitor = createMonitor();
+
+        // Create the server
+
         final ServerFactoryLocator locator = ServerFactoryLocator.getInstance(this);
         final ServerFactory factory = locator.getFactory(getServerType());
         final Server server = factory.createServer();
+
+        // Configure the server
+
         final Map<String, Object> config = getServerConfig();
         for (final Map.Entry<String, Object> entry : config.entrySet()) {
             server.configure(entry.getKey(), entry.getValue(), this);
         }
-        server.start(this);
-        started();
+
+        // Run the monitor
+
+        final Monitor monitor = createMonitor();
         if (daemon) {
-            new Thread(new Runnable() {
-                public void run() {
-                    monitor.runMonitor(server, AbstractRunMojo.this);
-                    stopped();
-                }
-            }).start();
+            monitor.runMonitorDaemon(server, this, this);
         } else {
-            monitor.runMonitor(server, this);
-            stopped();
+            monitor.runMonitor(server, this, this);
         }
     }
 }
+

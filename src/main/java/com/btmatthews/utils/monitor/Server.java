@@ -43,22 +43,6 @@ public interface Server {
     void start(Logger logger);
 
     /**
-     * Pause the server.
-     *
-     * @param logger Used to log error messages.
-     * @since 1.1.0
-     */
-    void pause(Logger logger);
-
-    /**
-     * Resume the server.
-     *
-     * @param logger Used to log error messages.
-     * @since 1.1.0
-     */
-    void resume(Logger logger);
-
-    /**
      * Stop the server.
      *
      * @param logger Used to log error messages.

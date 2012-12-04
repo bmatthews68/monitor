@@ -32,12 +32,12 @@ public class DummyServerFactory implements ServerFactory {
     /**
      * Returns the name of the dummy server.
      *
-     * @return Always returns {@code "Dummy"}.
+     * @return Always returns {@code "dummy"}.
      * @see ServerFactory#getServerName()
      */
     @Override
     public String getServerName() {
-        return "Dummy";
+        return "dummy";
     }
 
     /**
