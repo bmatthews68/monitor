@@ -46,16 +46,27 @@ public final class ServerFactoryLocator {
     private final Map<String, ServerFactory> serverFactoryMapping = new HashMap<String, ServerFactory>();
 
     /**
-     * Get the singleton instance of the locator. If the singleton has not
+     * Get the singleton instance of the locator using the default class loader. If the singleton has not
      * already been created it will be created and initialised as a side-effect.
      *
      * @param logger Used to report status and error messages.
      * @return The singleton instance of the locator.
      */
     public static ServerFactoryLocator getInstance(final Logger logger) {
+        return getInstance(logger, ServerFactoryLocator.class.getClassLoader());
+    }
+
+    /**
+     * Get the singleton instance of the locator using the specified class loader. If the singleton has not
+     * already been created it will be created and initialised as a side-effect.
+     *
+     * @param logger      Used to report status and error messages.
+     * @param classLoader The class loader used to scan the classpath for ServerFactory configurations.
+     * @return The singleton instance of the locator.
+     */
+    public static ServerFactoryLocator getInstance(final Logger logger, final ClassLoader classLoader) {
         if (instance == null) {
-            instance = new ServerFactoryLocator();
-            instance.init(logger);
+            instance = new ServerFactoryLocator(logger, classLoader);
         }
         return instance;
     }
@@ -65,10 +76,10 @@ public final class ServerFactoryLocator {
      * factory objects.
      *
      * @param logger Used to report status and error messages.
+     * @param classLoader The class loader used to scan the classpath for ServerFactory configurations.
      */
-    private void init(final Logger logger) {
+    public ServerFactoryLocator(final Logger logger, final ClassLoader classLoader) {
         try {
-            final ClassLoader classLoader = ServerFactoryLocator.class.getClassLoader();
             final Enumeration<URL> resources = classLoader
                     .getResources("META-INF/service/com.btmatthews.utils.monitor.ServerFactory");
             while (resources.hasMoreElements()) {
