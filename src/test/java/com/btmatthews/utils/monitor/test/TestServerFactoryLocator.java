@@ -5,7 +5,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
@@ -15,11 +17,7 @@ import com.btmatthews.utils.monitor.ServerFactory;
 import com.btmatthews.utils.monitor.ServerFactoryLocator;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Unit test the server factory locator.
@@ -27,8 +25,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
  * @author <a href="mailto:brian@btmatthews.com">Brian Matthews</a>
  * @version 1.0.0
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ ServerFactoryLocator.class })
 public class TestServerFactoryLocator {
 
     /**
@@ -67,6 +63,11 @@ public class TestServerFactoryLocator {
         assertNotNull(serverFactory.createServer());
     }
 
+    /**
+     * Verify that {@link ServerFactoryLocator#getInstance(com.btmatthews.utils.monitor.Logger)} returns a singleton.
+     *
+     * @throws Exception If the test case fails.
+     */
     @Test
     public void testGetInstance() {
         final ServerFactoryLocator firstLocator = ServerFactoryLocator.getInstance(logger);
@@ -76,15 +77,18 @@ public class TestServerFactoryLocator {
         assertSame(firstLocator, secondLocator);
     }
 
+    /**
+     * Verify that the server factory locator logs an error if there was an I/O exception scanning for the
+     * configuration files.
+     *
+     * @throws Exception If the test case fails.
+     */
     @Test
     public void testLoadFactoriesThrowsIOException() throws Exception {
-        PowerMockito.spy(ClassLoader.class);
-        PowerMockito.when(
-                ClassLoader.class,
-                "getResources",
-                eq("META-INF/service/com.btmatthews.utils.monitor.ServerFactory"))
+        final ClassLoader classLoader = mock(ClassLoader.class);
+        when(classLoader.getResources(eq("META-INF/service/com.btmatthews.utils.monitor.ServerFactory")))
                 .thenThrow(new IOException());
-        ServerFactoryLocator.getInstance(logger);
+        new ServerFactoryLocator(logger, classLoader);
         verify(logger).logError(
                 eq("Error loading META-INF/service/com.btmatthews.utils.monitor.ServerFactory"),
                 any(IOException.class));

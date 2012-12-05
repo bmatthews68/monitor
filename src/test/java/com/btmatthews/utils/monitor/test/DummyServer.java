@@ -21,7 +21,7 @@ import com.btmatthews.utils.monitor.Logger;
 import com.btmatthews.utils.monitor.Server;
 
 /**
- * Implements a dummy server for unit test.
+ * Implements a dummy server for unit testing.
  *
  * @author <a href="mailto:brian@btmatthews.com">Brian Matthews</a>
  * @version 1.0.0

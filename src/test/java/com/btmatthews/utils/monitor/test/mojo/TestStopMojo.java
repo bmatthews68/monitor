@@ -54,15 +54,27 @@ public class TestStopMojo {
     @Mock
     private Logger logger;
 
+    /**
+     * Mock observer fixture.
+     */
     @Mock
     private MonitorObserver observer;
 
+    /**
+     * Mock logger for used by Maven.
+     */
     @Mock
     private Log log;
 
+    /**
+     * Spy test fixture.
+     */
     @Spy
     private StopMojo mojo = new StopMojo();
 
+    /**
+     * Spy test fixture.
+     */
     @Spy
     private StopMojo wrongMojo = new StopMojo();
 
@@ -81,6 +93,11 @@ public class TestStopMojo {
     }
 
 
+    /**
+     * Verify that stop logs an error if there is no monitor running.
+     *
+     * @throws Exception If there was an error.
+     */
     @Test
     public void testStopWithNoServer() throws Exception {
         whenNew(Socket.class)
@@ -126,6 +143,11 @@ public class TestStopMojo {
         validateMockitoUsage();
     }
 
+    /**
+     * Verify that stop logs an error if the wrong client is used.
+     *
+     * @throws Exception If the unit test failed.
+     */
     @Test
     public void testStopWithWrongMojo() throws Exception {
         final Monitor monitor = new Monitor("dummy", 10000);

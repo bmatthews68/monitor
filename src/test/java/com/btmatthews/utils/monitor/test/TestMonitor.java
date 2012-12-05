@@ -56,15 +56,27 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PrepareForTest({ Monitor.class })
 public class TestMonitor {
 
+    /**
+     * Mock the server test fixture.
+     */
     @Mock
     private Server server;
 
+    /**
+     * Mock the logger test fixture.
+     */
     @Mock
     private Logger logger;
 
+    /**
+     * Mock the observer test fixture.
+     */
     @Mock
     private MonitorObserver observer;
 
+    /**
+     * Initialise the mock test fixtures.
+     */
     @Before
     public void setUp() {
         initMocks(this);
@@ -72,9 +84,11 @@ public class TestMonitor {
 
     /**
      * Verify that a monitor can be started and stopped successfully.
+     *
+     * @throws Exception If the test case fails.
      */
     @Test
-    public void testMonitor() throws InterruptedException {
+    public void testMonitor() throws Exception {
         final Monitor monitor = new Monitor("test", 10000);
         final Thread monitorThread = monitor.runMonitorDaemon(server, logger, observer);
         final Timer timer = new Timer();
@@ -96,6 +110,11 @@ public class TestMonitor {
         validateMockitoUsage();
     }
 
+    /**
+     * Verify that a server can be configured via the monitor.
+     *
+     * @throws Exception If the test case fails.
+     */
     @Test
     public void testMonitorConfigure() throws Exception {
         final Monitor monitor = new Monitor("test", 10000);
@@ -122,6 +141,11 @@ public class TestMonitor {
         validateMockitoUsage();
     }
 
+    /**
+     * Verify that the server ignores commands with an invalid key.
+     *
+     * @throws Exception If the test case fails.
+     */
     @Test
     public void testInvalidMonitorKey() throws Exception {
         final Monitor monitor = new Monitor("test", 10000);
@@ -147,41 +171,17 @@ public class TestMonitor {
         validateMockitoUsage();
     }
 
+    /**
+     * Verify that the monitor will log an error if it could nt open a TCP port.
+     *
+     * @throws Exception If the test case fails.
+     */
     @Test
     public void testRunMonitorWithIOException() throws Exception {
         whenNew(ServerSocket.class).withArguments(eq(10000), eq(1), any(InetAddress.class)).thenThrow(new IOException());
         final Monitor monitor = new Monitor("test", 10000);
         monitor.runMonitor(server, logger, observer);
         verify(logger).logError(eq("Error starting or stopping the monitor"), any(IOException.class));
-        verifyNoMoreInteractions(logger, server, observer);
-        validateMockitoUsage();
-    }
-
-    @Test
-    @Ignore
-    public void testRunMonitorInternalWithIOException() throws Exception {
-        final ServerSocket serverSocket = spy(new ServerSocket(10000, 1, InetAddress.getLocalHost()));
-        when(serverSocket.accept(), times(1)).thenThrow(new IOException());
-        whenNew(ServerSocket.class).withArguments(eq(10000), eq(1), any(InetAddress.class)).thenReturn(serverSocket);
-        final Monitor monitor = new Monitor("test", 10000);
-        final Thread monitorThread = monitor.runMonitorDaemon(server, logger, observer);
-        final Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Monitor.sendCommand("test", 10000, "stop", logger);
-                Monitor.sendCommand("test", 10000, "stop", logger);
-            }
-        }, 5000L);
-        monitorThread.join(10000L);
-        verify(server).start(same(logger));
-        verify(logger, times(2)).logInfo(eq("Waiting for command from client"));
-        verify(logger).logInfo(eq("Sending command \"stop\" to monitor"));
-        verify(logger).logInfo(eq("Receiving command from client"));
-        verify(logger).logError(eq("Invalid monitor key"));
-        verify(server).stop(same(logger));
-        verify(observer).started(same(server), same(logger));
-        verify(observer).stopped(same(server), same(logger));
         verifyNoMoreInteractions(logger, server, observer);
         validateMockitoUsage();
     }

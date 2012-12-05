@@ -6,7 +6,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.stub;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -25,33 +24,47 @@ import org.codehaus.plexus.util.ReflectionUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 
 /**
- * Created with IntelliJ IDEA.
- * User: Brian
- * Date: 30/11/12
- * Time: 18:10
- * To change this template use File | Settings | File Templates.
+ * Unit test {@link AbstractRunMojo}.
+ *
+ * @author <a href="mailto:brian@btmatthews.com">Brian Matthews</a>
+ * @since 1.1.0
  */
 public class TestRunMojo {
 
+    /**
+     * Used for testing the logging methods.
+     */
     private static final String MESSAGE = "Lorem ipsum dolor sit amet";
 
+    /**
+     * The abstract base class being tested.
+     */
     @Mock
     private AbstractRunMojo mojo;
 
+    /**
+     * The mock logger fixture.
+     */
     @Mock
     private Log log;
 
+    /**
+     * A mock exception.
+     */
     @Mock
     private Exception exception;
 
-    private Map<String, Object> config = new HashMap<String, Object>();
-
+    /**
+     * Initialise the mock objects and test fixtures.
+     *
+     * @throws Exception If there was an error.
+     */
     @Before
     public void setUp() throws Exception {
         initMocks(this);
+        final Map<String, Object> config = new HashMap<String, Object>();
         config.put("debug", Boolean.FALSE);
         when(mojo.getLog()).thenReturn(log);
         when(mojo.getServerType()).thenReturn("dummy");
@@ -68,23 +81,38 @@ public class TestRunMojo {
         ReflectionUtils.setVariableValueInObject(mojo, "monitorKey", "dummy");
     }
 
+    /**
+     * Verify that {@link Logger#logInfo(String)} has been implemented.
+     */
     @Test
     public void testLogInfo() {
         mojo.logInfo(MESSAGE);
         verify(log).info(eq(MESSAGE));
     }
 
+    /**
+     * Verify that {@link Logger#logError(String)} has been implemented.
+     */
     @Test
     public void testLogError() {
         mojo.logError(MESSAGE);
         verify(log).error(eq(MESSAGE));
     }
 
+    /**
+     * Verify that {@link Logger#logError(String, Throwable)} has been implemented.
+     */
     @Test
     public void testLogErrorAndException() {
         mojo.logError(MESSAGE, exception);
         verify(log).error(eq(MESSAGE), same(exception));
     }
+
+    /**
+     * Verify that we can start the server as foreground process.
+     *
+     * @throws Exception If there was an error.
+     */
     @Test
     public void testRun() throws Exception {
         ReflectionUtils.setVariableValueInObject(mojo, "daemon", Boolean.FALSE);
