@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<pmd version="4.3" timestamp="2012-12-05T14:28:27.999">
+<pmd version="4.3" timestamp="2012-12-06T10:46:34.622">
 <file name="C:\Users\Brian\Documents\GitHub\monitor\target\checkout\src\main\java\com\btmatthews\utils\monitor\ServerFactory.java">
 <violation beginline="19" endline="19" begincolumn="1" endcolumn="21" rule="UnusedImports" ruleset="Import Statement Rules" package="com.btmatthews.utils.monitor" externalInfoUrl="http://pmd.sourceforge.net/rules/imports.html#UnusedImports" priority="4">
 Avoid unused imports such as 'java.util.Map'

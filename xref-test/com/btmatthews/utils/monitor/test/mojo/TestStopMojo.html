@@ -31,7 +31,7 @@
 <a class="jxr_linenumber" name="21" href="#21">21</a>  <strong class="jxr_keyword">import</strong> com.btmatthews.utils.monitor.Monitor;
 <a class="jxr_linenumber" name="22" href="#22">22</a>  <strong class="jxr_keyword">import</strong> com.btmatthews.utils.monitor.MonitorObserver;
 <a class="jxr_linenumber" name="23" href="#23">23</a>  <strong class="jxr_keyword">import</strong> com.btmatthews.utils.monitor.Server;
-<a class="jxr_linenumber" name="24" href="#24">24</a>  <strong class="jxr_keyword">import</strong> com.btmatthews.utils.monitor.mojo.StopMojo;
+<a class="jxr_linenumber" name="24" href="#24">24</a>  <strong class="jxr_keyword">import</strong> com.btmatthews.utils.monitor.mojo.AbstractStopMojo;
 <a class="jxr_linenumber" name="25" href="#25">25</a>  <strong class="jxr_keyword">import</strong> org.apache.maven.plugin.logging.Log;
 <a class="jxr_linenumber" name="26" href="#26">26</a>  <strong class="jxr_keyword">import</strong> org.codehaus.plexus.util.ReflectionUtils;
 <a class="jxr_linenumber" name="27" href="#27">27</a>  <strong class="jxr_keyword">import</strong> org.junit.Before;
@@ -49,7 +49,7 @@
 <a class="jxr_linenumber" name="39" href="#39">39</a>  <em class="jxr_javadoccomment"> * @since 1.1.0</em>
 <a class="jxr_linenumber" name="40" href="#40">40</a>  <em class="jxr_javadoccomment"> */</em>
 <a class="jxr_linenumber" name="41" href="#41">41</a>  @RunWith(PowerMockRunner.<strong class="jxr_keyword">class</strong>)
-<a class="jxr_linenumber" name="42" href="#42">42</a>  @PrepareForTest({ StopMojo.<strong class="jxr_keyword">class</strong> })
+<a class="jxr_linenumber" name="42" href="#42">42</a>  @PrepareForTest({ AbstractStopMojo.<strong class="jxr_keyword">class</strong> })
 <a class="jxr_linenumber" name="43" href="#43">43</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../../com/btmatthews/utils/monitor/test/mojo/TestStopMojo.html">TestStopMojo</a> {
 <a class="jxr_linenumber" name="44" href="#44">44</a>  
 <a class="jxr_linenumber" name="45" href="#45">45</a>      <em class="jxr_javadoccomment">/**</em>
@@ -80,13 +80,13 @@
 <a class="jxr_linenumber" name="70" href="#70">70</a>  <em class="jxr_javadoccomment">     * Spy test fixture.</em>
 <a class="jxr_linenumber" name="71" href="#71">71</a>  <em class="jxr_javadoccomment">     */</em>
 <a class="jxr_linenumber" name="72" href="#72">72</a>      @Spy
-<a class="jxr_linenumber" name="73" href="#73">73</a>      <strong class="jxr_keyword">private</strong> StopMojo mojo = <strong class="jxr_keyword">new</strong> StopMojo();
+<a class="jxr_linenumber" name="73" href="#73">73</a>      <strong class="jxr_keyword">private</strong> AbstractStopMojo mojo = <strong class="jxr_keyword">new</strong> AbstractStopMojo(){};
 <a class="jxr_linenumber" name="74" href="#74">74</a>  
 <a class="jxr_linenumber" name="75" href="#75">75</a>      <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="76" href="#76">76</a>  <em class="jxr_javadoccomment">     * Spy test fixture.</em>
 <a class="jxr_linenumber" name="77" href="#77">77</a>  <em class="jxr_javadoccomment">     */</em>
 <a class="jxr_linenumber" name="78" href="#78">78</a>      @Spy
-<a class="jxr_linenumber" name="79" href="#79">79</a>      <strong class="jxr_keyword">private</strong> StopMojo wrongMojo = <strong class="jxr_keyword">new</strong> StopMojo();
+<a class="jxr_linenumber" name="79" href="#79">79</a>      <strong class="jxr_keyword">private</strong> AbstractStopMojo wrongMojo = <strong class="jxr_keyword">new</strong> AbstractStopMojo(){};
 <a class="jxr_linenumber" name="80" href="#80">80</a>  
 <a class="jxr_linenumber" name="81" href="#81">81</a>      <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="82" href="#82">82</a>  <em class="jxr_javadoccomment">     * Prepare for test case execution by initialising the mocks.</em>
@@ -122,7 +122,7 @@
 <a class="jxr_linenumber" name="112" href="#112">112</a> 
 <a class="jxr_linenumber" name="113" href="#113">113</a> 
 <a class="jxr_linenumber" name="114" href="#114">114</a>     <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="115" href="#115">115</a> <em class="jxr_javadoccomment">     * Start a mock server and verify that the {@link com.btmatthews.utils.monitor.mojo.StopMojo} signals it to shutdown.</em>
+<a class="jxr_linenumber" name="115" href="#115">115</a> <em class="jxr_javadoccomment">     * Start a mock server and verify that the {@link com.btmatthews.utils.monitor.mojo.AbstractStopMojo} signals it to shutdown.</em>
 <a class="jxr_linenumber" name="116" href="#116">116</a> <em class="jxr_javadoccomment">     *</em>
 <a class="jxr_linenumber" name="117" href="#117">117</a> <em class="jxr_javadoccomment">     * @throws Exception If the test case failed.</em>
 <a class="jxr_linenumber" name="118" href="#118">118</a> <em class="jxr_javadoccomment">     */</em>
