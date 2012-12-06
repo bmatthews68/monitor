@@ -18,7 +18,6 @@ package com.btmatthews.utils.monitor.mojo;
 
 import com.btmatthews.utils.monitor.Monitor;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Mojo;
 
 /**
  * Implements the stop goal for plug-ins that use the Monitor framework.
@@ -26,8 +25,7 @@ import org.apache.maven.plugins.annotations.Mojo;
  * @author <a href="mailto:brian@btmatthews.com">Brian Matthews</a>
  * @since 1.1.0
  */
-@Mojo(name = "stop")
-public class StopMojo extends AbstractServerMojo {
+public class AbstractStopMojo extends AbstractServerMojo {
 
     /**
      * Stop a running an embedded server by sending a {@code stop} command to the monitor that is controlling that

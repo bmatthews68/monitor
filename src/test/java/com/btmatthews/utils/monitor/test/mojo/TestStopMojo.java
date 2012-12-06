@@ -21,7 +21,7 @@ import com.btmatthews.utils.monitor.Logger;
 import com.btmatthews.utils.monitor.Monitor;
 import com.btmatthews.utils.monitor.MonitorObserver;
 import com.btmatthews.utils.monitor.Server;
-import com.btmatthews.utils.monitor.mojo.StopMojo;
+import com.btmatthews.utils.monitor.mojo.AbstractStopMojo;
 import org.apache.maven.plugin.logging.Log;
 import org.codehaus.plexus.util.ReflectionUtils;
 import org.junit.Before;
@@ -39,7 +39,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
  * @since 1.1.0
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ StopMojo.class })
+@PrepareForTest({ AbstractStopMojo.class })
 public class TestStopMojo {
 
     /**
@@ -70,13 +70,13 @@ public class TestStopMojo {
      * Spy test fixture.
      */
     @Spy
-    private StopMojo mojo = new StopMojo();
+    private AbstractStopMojo mojo = new AbstractStopMojo(){};
 
     /**
      * Spy test fixture.
      */
     @Spy
-    private StopMojo wrongMojo = new StopMojo();
+    private AbstractStopMojo wrongMojo = new AbstractStopMojo(){};
 
     /**
      * Prepare for test case execution by initialising the mocks.
@@ -112,7 +112,7 @@ public class TestStopMojo {
 
 
     /**
-     * Start a mock server and verify that the {@link com.btmatthews.utils.monitor.mojo.StopMojo} signals it to shutdown.
+     * Start a mock server and verify that the {@link com.btmatthews.utils.monitor.mojo.AbstractStopMojo} signals it to shutdown.
      *
      * @throws Exception If the test case failed.
      */
