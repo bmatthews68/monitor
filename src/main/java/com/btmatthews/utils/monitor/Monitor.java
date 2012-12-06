@@ -108,6 +108,7 @@ public final class Monitor {
                 Monitor.this.runMonitor(server, logger, observer);
             }
         });
+        monitorThread.setDaemon(true);
         monitorThread.start();
         return monitorThread;
     }
