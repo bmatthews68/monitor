@@ -16,15 +16,9 @@
 
 package com.btmatthews.utils.monitor;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.text.MessageFormat;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ServiceLoader;
 
 /**
  * This locator object is a singleton that is used to obtain the factory that
@@ -39,11 +33,24 @@ public final class ServerFactoryLocator {
      * The singleton instance of the locator.
      */
     private static ServerFactoryLocator instance;
-
     /**
      * Registered factories keyed by their server name.
      */
     private final Map<String, ServerFactory> serverFactoryMapping = new HashMap<String, ServerFactory>();
+
+    /**
+     * The constructor that scans the classpath and registers all available
+     * factory objects.
+     *
+     * @param logger      Used to report status and error messages.
+     * @param classLoader The class loader used to scan the classpath for ServerFactory configurations.
+     */
+    public ServerFactoryLocator(final Logger logger, final ClassLoader classLoader) {
+        final ServiceLoader<ServerFactory> loader = ServiceLoader.load(ServerFactory.class, classLoader);
+        for (final ServerFactory serverFactory : loader) {
+            serverFactoryMapping.put(serverFactory.getServerName(), serverFactory);
+        }
+    }
 
     /**
      * Get the singleton instance of the locator using the default class loader. If the singleton has not
@@ -69,83 +76,6 @@ public final class ServerFactoryLocator {
             instance = new ServerFactoryLocator(logger, classLoader);
         }
         return instance;
-    }
-
-    /**
-     * The constructor that scans the classpath and registers all available
-     * factory objects.
-     *
-     * @param logger Used to report status and error messages.
-     * @param classLoader The class loader used to scan the classpath for ServerFactory configurations.
-     */
-    public ServerFactoryLocator(final Logger logger, final ClassLoader classLoader) {
-        try {
-            final Enumeration<URL> resources = classLoader
-                    .getResources("META-INF/service/com.btmatthews.utils.monitor.ServerFactory");
-            while (resources.hasMoreElements()) {
-                final URL resourceUrl = resources.nextElement();
-                loadServerFactories(resourceUrl, logger);
-            }
-        } catch (final IOException e) {
-            logger.logError("Error loading META-INF/service/com.btmatthews.utils.monitor.ServerFactory", e);
-        }
-    }
-
-    /**
-     * Load all the server factories from the service file accessed using the
-     * URL {@code url}.
-     *
-     * @param url    The location of the service file.
-     * @param logger Used to report status and error messages.
-     * @throws IOException If there was a problem loading the service file.
-     */
-    private void loadServerFactories(final URL url, final Logger logger)
-            throws IOException {
-        final InputStream resourceStream = url.openStream();
-        try {
-            loadServerFactories(resourceStream, logger);
-        } finally {
-            resourceStream.close();
-        }
-    }
-
-    /**
-     * Load all the server factories from the service file accessed via the
-     * input stream {@code inputStream}.
-     *
-     * @param inputStream The input stream.
-     * @param logger      Used to report status and error messages.
-     * @throws IOException If there was a problem loading the input stream.
-     */
-    @SuppressWarnings("unchecked")
-    private void loadServerFactories(final InputStream inputStream,
-                                     final Logger logger) throws IOException {
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(
-                inputStream));
-        String serverFactoryClassName = reader.readLine();
-        while (serverFactoryClassName != null) {
-            if (serverFactoryClassName.length() > 0) {
-                try {
-                    final Class<ServerFactory> serverFactoryClass = (Class<ServerFactory>)Class.forName(serverFactoryClassName);
-                    final ServerFactory serverFactory = serverFactoryClass.newInstance();
-                    serverFactoryMapping.put(serverFactory.getServerName(), serverFactory);
-                } catch (final ClassNotFoundException e) {
-                    final String message = MessageFormat.format("Class {0} not found", serverFactoryClassName);
-                    logger.logError(message, e);
-                } catch (final IllegalAccessException e) {
-                    final String message = MessageFormat.format(
-                            "Cannot access class {0} or its constructor",
-                            serverFactoryClassName);
-                    logger.logError(message, e);
-                } catch (final InstantiationException e) {
-                    final String message = MessageFormat.format(
-                            "Class {0} cannot be instantiated",
-                            serverFactoryClassName);
-                    logger.logError(message, e);
-                }
-            }
-            serverFactoryClassName = reader.readLine();
-        }
     }
 
     /**

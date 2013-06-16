@@ -76,21 +76,4 @@ public class TestServerFactoryLocator {
         assertNotNull(secondLocator);
         assertSame(firstLocator, secondLocator);
     }
-
-    /**
-     * Verify that the server factory locator logs an error if there was an I/O exception scanning for the
-     * configuration files.
-     *
-     * @throws Exception If the test case fails.
-     */
-    @Test
-    public void testLoadFactoriesThrowsIOException() throws Exception {
-        final ClassLoader classLoader = mock(ClassLoader.class);
-        when(classLoader.getResources(eq("META-INF/service/com.btmatthews.utils.monitor.ServerFactory")))
-                .thenThrow(new IOException());
-        new ServerFactoryLocator(logger, classLoader);
-        verify(logger).logError(
-                eq("Error loading META-INF/service/com.btmatthews.utils.monitor.ServerFactory"),
-                any(IOException.class));
-    }
 }
