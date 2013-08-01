@@ -43,9 +43,27 @@ public interface Server {
     void start(Logger logger);
 
     /**
+     * Check to see if the server is started.
+     *
+     * @param logger Used to log error messages.
+     * @return Returns {@code true} if the server has started.
+     * @since 2.1.0
+     */
+    boolean isStarted(Logger logger);
+
+    /**
      * Stop the server.
      *
      * @param logger Used to log error messages.
      */
     void stop(Logger logger);
+
+    /**
+     * Check to see if the server is stopped.
+     *
+     * @param logger Used to log error messages.
+     * @return Returns {@code true} if the server has stopped.
+     * @since 2.1.0
+     */
+    boolean isStopped(Logger logger);
 }

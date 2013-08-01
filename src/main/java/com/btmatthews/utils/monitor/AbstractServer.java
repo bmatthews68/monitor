@@ -45,11 +45,35 @@ public abstract class AbstractServer implements Server {
     }
 
     /**
+     * Invoked by the monitor to check if the server has launched. This default implementation
+     * always returns {@code true}.
+     *
+     * @param logger Used to log error messages.
+     * @return Always returns {@code true}.
+     * @since 2.1.0
+     */
+    public boolean isStarted(final Logger logger) {
+        return true;
+    }
+
+    /**
      * Invoked by the monitor to halt the server.
      *
      * @param logger Used to log status and error messages.
      * @see com.btmatthews.utils.monitor.Server#start(com.btmatthews.utils.monitor.Logger)
      */
     public void stop(final Logger logger) {
+    }
+
+    /**
+     * Invoked by the monitor to check if the server has halted.  The default implementation always
+     * returns {@code true}.
+     *
+     * @param logger Used to log error messages.
+     * @return Always returns {@code true}.
+     * @since 2.1.0
+     */
+    public boolean isStopped(final Logger logger) {
+        return true;
     }
 }

@@ -1,22 +1,5 @@
 package com.btmatthews.utils.monitor.test.mojo;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.validateMockitoUsage;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.whenNew;
-
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import com.btmatthews.utils.monitor.Logger;
 import com.btmatthews.utils.monitor.Monitor;
 import com.btmatthews.utils.monitor.MonitorObserver;
@@ -32,6 +15,19 @@ import org.mockito.Spy;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.same;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.powermock.api.mockito.PowerMockito.whenNew;
+
 /**
  * Unit tests for the Mojo that implements the stop goal.
  *
@@ -39,7 +35,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
  * @since 1.1.0
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ AbstractStopMojo.class })
+@PrepareForTest({AbstractStopMojo.class})
 public class TestStopMojo {
 
     /**
@@ -47,36 +43,33 @@ public class TestStopMojo {
      */
     @Mock
     private Server server;
-
     /**
      * Mock for the logger.
      */
     @Mock
     private Logger logger;
-
     /**
      * Mock observer fixture.
      */
     @Mock
     private MonitorObserver observer;
-
     /**
      * Mock logger for used by Maven.
      */
     @Mock
     private Log log;
-
     /**
      * Spy test fixture.
      */
     @Spy
-    private AbstractStopMojo mojo = new AbstractStopMojo(){};
-
+    private AbstractStopMojo mojo = new AbstractStopMojo() {
+    };
     /**
      * Spy test fixture.
      */
     @Spy
-    private AbstractStopMojo wrongMojo = new AbstractStopMojo(){};
+    private AbstractStopMojo wrongMojo = new AbstractStopMojo() {
+    };
 
     /**
      * Prepare for test case execution by initialising the mocks.
@@ -90,8 +83,9 @@ public class TestStopMojo {
         ReflectionUtils.setVariableValueInObject(wrongMojo, "monitorKey", "jester");
         when(mojo.getLog()).thenReturn(log);
         when(wrongMojo.getLog()).thenReturn(log);
+        when(server.isStarted(any(Logger.class))).thenReturn(true);
+        when(server.isStopped(any(Logger.class))).thenReturn(true);
     }
-
 
     /**
      * Verify that stop logs an error if there is no monitor running.
@@ -109,7 +103,6 @@ public class TestStopMojo {
         verify(log).error(eq("Error sending command to monitor"), any(IOException.class));
         verifyZeroInteractions(server, logger, log, observer);
     }
-
 
     /**
      * Start a mock server and verify that the {@link com.btmatthews.utils.monitor.mojo.AbstractStopMojo} signals it to shutdown.
@@ -133,10 +126,12 @@ public class TestStopMojo {
         }, 5000L);
         monitorThread.join(15000L);
         verify(server).start(same(logger));
+        verify(server, times(2)).isStarted(same(logger));
         verify(logger).logInfo(eq("Waiting for command from client"));
         verify(log).info(eq("Sending command \"stop\" to monitor"));
         verify(logger).logInfo(eq("Receiving command from client"));
         verify(server).stop(same(logger));
+        verify(server).isStopped(same(logger));
         verify(observer).started(same(server), same(logger));
         verify(observer).stopped(same(server), same(logger));
         verifyZeroInteractions(server, logger, log, observer);
@@ -166,11 +161,13 @@ public class TestStopMojo {
         }, 5000L);
         monitorThread.join(15000L);
         verify(server).start(same(logger));
+        verify(server, times(2)).isStarted(same(logger));
         verify(logger, times(2)).logInfo(eq("Waiting for command from client"));
         verify(log, times(2)).info(eq("Sending command \"stop\" to monitor"));
         verify(logger, times(2)).logInfo(eq("Receiving command from client"));
         verify(logger).logError(eq("Invalid monitor key"));
         verify(server).stop(same(logger));
+        verify(server).isStopped(same(logger));
         verify(observer).started(same(server), same(logger));
         verify(observer).stopped(same(server), same(logger));
         verifyZeroInteractions(server, logger, log, observer);

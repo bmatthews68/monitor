@@ -16,15 +16,7 @@
 
 package com.btmatthews.utils.monitor;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.Writer;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -43,21 +35,46 @@ public final class Monitor {
      * The regex for the configure command.
      */
     private static final Pattern CONFIGURE_PATTERN = Pattern.compile("configure\\s+(\\w+)=(.*)");
-
+    /**
+     * The default number of times to retry when checking for successful server start
+     * or stop.
+     *
+     * @since 2.1.0
+     */
+    private static final int DEFAULT_RETRY_COUNT = 3;
+    /**
+     * The default interval between retries when checking for successful server start
+     * or stop.
+     *
+     * @since 2.1.0
+     */
+    private static final int DEFAULT_RETRY_INTERVAL = 500;
     /**
      * The stop command.
      */
     private static final String STOP = "stop";
-
     /**
      * The monitor key that must prefix any commands.
      */
     private final String monitorKey;
-
     /**
      * The port on which the monitor is listening.
      */
     private final int monitorPort;
+    /**
+     * The number of times to retry when checking for successful server start
+     * or stop.
+     *
+     * @since 2.1.0
+     */
+    private int retryCount;
+    /**
+     * The interval between retries when checking for successful server start
+     * or stop.
+     *
+     * @since 2.1.0
+     */
+    private int retryInterval;
 
     /**
      * The constructor that initialises the monitor key and port.
@@ -66,8 +83,34 @@ public final class Monitor {
      * @param port The port on which the monitor is listening.
      */
     public Monitor(final String key, final int port) {
+        this(key, port, DEFAULT_RETRY_COUNT, DEFAULT_RETRY_INTERVAL);
+    }
+
+    /**
+     * The constructor that initialises the monitor key and port.
+     *
+     * @param key      The monitor key that must prefix any commands.
+     * @param port     The port on which the monitor is listening.
+     * @param count    The number of retry counts.
+     * @param interval The intervals between retries.
+     */
+    public Monitor(final String key, final int port, final int count, final int interval) {
         monitorKey = key;
         monitorPort = port;
+        retryCount = count;
+        retryInterval = interval;
+    }
+
+    /**
+     * Static method used to send a command to a server via a monitor.
+     *
+     * @param key     The monitor key.
+     * @param port    The monitor port.
+     * @param command The command to be sent to the server.
+     * @param logger  Used to log information and error messages.
+     */
+    public static void sendCommand(final String key, final int port, final String command, final Logger logger) {
+        new Monitor(key, port).sendCommand(command, logger);
     }
 
     /**
@@ -83,9 +126,13 @@ public final class Monitor {
             try {
                 serverSocket.setReuseAddress(true);
                 server.start(logger);
-                observer.started(server, logger);
-                runMonitorInternal(server, logger, serverSocket);
-                observer.stopped(server, logger);
+                if (waitForStart(server, logger)) {
+                    observer.started(server, logger);
+                    runMonitorInternal(server, logger, serverSocket);
+                    if (waitForStop(server, logger)) {
+                        observer.stopped(server, logger);
+                    }
+                }
             } finally {
                 serverSocket.close();
             }
@@ -110,6 +157,7 @@ public final class Monitor {
         });
         monitorThread.setDaemon(true);
         monitorThread.start();
+        waitForStart(server, logger);
         return monitorThread;
     }
 
@@ -167,18 +215,6 @@ public final class Monitor {
     }
 
     /**
-     * Static method used to send a command to a server via a monitor.
-     *
-     * @param key     The monitor key.
-     * @param port    The monitor port.
-     * @param command The command to be sent to the server.
-     * @param logger  Used to log information and error messages.
-     */
-    public static void sendCommand(final String key, final int port, final String command, final Logger logger) {
-        new Monitor(key, port).sendCommand(command, logger);
-    }
-
-    /**
      * Send a command to the monitor.
      *
      * @param command The command.
@@ -233,5 +269,49 @@ public final class Monitor {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Wait for the server to start.
+     *
+     * @param server The server being monitored.
+     * @param logger Used to log error messages.
+     * @return {@code true} if the server has started.
+     * @since 2.1.0
+     */
+    private boolean waitForStart(final Server server, final Logger logger) {
+        for (int i = 0; i < retryCount; ++i) {
+            if (server.isStarted(logger)) {
+                return true;
+            }
+            try {
+                Thread.sleep(retryInterval);
+            } catch (final InterruptedException e) {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Wait for the server to stop.
+     *
+     * @param server The server being monitored.
+     * @param logger Used to log error messages.
+     * @return {@code true} if the server has stopped.
+     * @since 2.1.0
+     */
+    private boolean waitForStop(final Server server, final Logger logger) {
+        for (int i = 0; i < retryCount; ++i) {
+            if (server.isStopped(logger)) {
+                return true;
+            }
+            try {
+                Thread.sleep(retryInterval);
+            } catch (final InterruptedException e) {
+                return false;
+            }
+        }
+        return false;
     }
 }

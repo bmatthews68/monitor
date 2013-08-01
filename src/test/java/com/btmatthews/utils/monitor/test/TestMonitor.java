@@ -80,6 +80,8 @@ public class TestMonitor {
     @Before
     public void setUp() {
         initMocks(this);
+        when(server.isStarted(any(Logger.class))).thenReturn(true);
+        when(server.isStopped(any(Logger.class))).thenReturn(true);
     }
 
     /**
@@ -100,10 +102,12 @@ public class TestMonitor {
         }, 5000L);
         monitorThread.join(10000L);
         verify(server).start(same(logger));
+        verify(server, times(2)).isStarted(same(logger));
         verify(logger).logInfo(eq("Waiting for command from client"));
         verify(logger).logInfo(eq("Sending command \"stop\" to monitor"));
         verify(logger).logInfo(eq("Receiving command from client"));
         verify(server).stop(same(logger));
+        verify(server).isStopped(same(logger));
         verify(observer).started(same(server), same(logger));
         verify(observer).stopped(same(server), same(logger));
         verifyNoMoreInteractions(logger, server, observer);
@@ -129,12 +133,14 @@ public class TestMonitor {
         }, 5000L);
         monitorThread.join(10000L);
         verify(server).start(same(logger));
+        verify(server, times(2)).isStarted(same(logger));
         verify(logger, times(2)).logInfo(eq("Waiting for command from client"));
         verify(logger).logInfo(eq("Sending command \"configure debug=off\" to monitor"));
         verify(logger).logInfo(eq("Sending command \"stop\" to monitor"));
         verify(logger, times(2)).logInfo(eq("Receiving command from client"));
         verify(server).configure(eq("debug"), eq("off"), same(logger));
         verify(server).stop(same(logger));
+        verify(server).isStopped(same(logger));
         verify(observer).started(same(server), same(logger));
         verify(observer).stopped(same(server), same(logger));
         verifyNoMoreInteractions(logger, server, observer);
@@ -160,11 +166,13 @@ public class TestMonitor {
         }, 5000L);
         monitorThread.join(10000L);
         verify(server).start(same(logger));
+        verify(server, times(2)).isStarted(same(logger));
         verify(logger, times(2)).logInfo(eq("Waiting for command from client"));
         verify(logger, times(2)).logInfo(eq("Sending command \"stop\" to monitor"));
         verify(logger, times(2)).logInfo(eq("Receiving command from client"));
         verify(logger).logError(eq("Invalid monitor key"));
         verify(server).stop(same(logger));
+        verify(server).isStopped(same(logger));
         verify(observer).started(same(server), same(logger));
         verify(observer).stopped(same(server), same(logger));
         verifyNoMoreInteractions(logger, server, observer);
