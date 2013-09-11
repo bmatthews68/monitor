@@ -16,8 +16,6 @@
 
 package com.btmatthews.utils.monitor;
 
-import java.util.Map;
-
 /**
  * This interface is implemented by factories that create server objects that
  * can be controlled by a monitor.

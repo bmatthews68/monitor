@@ -280,14 +280,17 @@ public final class Monitor {
      * @since 2.1.0
      */
     private boolean waitForStart(final Server server, final Logger logger) {
-        for (int i = 0; i < retryCount; ++i) {
+        if (server.isStarted(logger)) {
+            return true;
+        }
+        try {
+            Thread.sleep(retryInterval);
+        } catch (final InterruptedException e) {
+            return false;
+        }
+        for (int i = 1; i < retryCount; ++i) {
             if (server.isStarted(logger)) {
                 return true;
-            }
-            try {
-                Thread.sleep(retryInterval);
-            } catch (final InterruptedException e) {
-                return false;
             }
         }
         return false;
@@ -302,14 +305,17 @@ public final class Monitor {
      * @since 2.1.0
      */
     private boolean waitForStop(final Server server, final Logger logger) {
-        for (int i = 0; i < retryCount; ++i) {
-            if (server.isStopped(logger)) {
-                return true;
-            }
+        if (server.isStopped(logger)) {
+            return true;
+        }
+        for (int i = 1; i < retryCount; ++i) {
             try {
                 Thread.sleep(retryInterval);
             } catch (final InterruptedException e) {
                 return false;
+            }
+            if (server.isStopped(logger)) {
+                return true;
             }
         }
         return false;

@@ -34,12 +34,25 @@ public abstract class AbstractServerMojo extends AbstractMojo implements Logger 
      */
     @Parameter(property = "monitor.port", required = true)
     private int monitorPort;
-
     /**
      * Key to provide when sending commands to the mail apache.
      */
     @Parameter(property = "monitor.key", required = true)
     private String monitorKey;
+    /**
+     * The number of times to retry when checking if the server has started or stopped.
+     *
+     * @since 2.1.1
+     */
+    @Parameter(property = "monitor.retryCount", defaultValue = "3")
+    private int monitorRetryCount;
+    /**
+     * The delay in milliseconds before retrying the check to see if the server has started or stopped.
+     *
+     * @since 2.1.1
+     */
+    @Parameter(property = "monitor.retryInterval", defaultValue = "500")
+    private int monitorRetryInterval;
 
     /**
      * Create the monitor object tha is used to control a server.
@@ -47,7 +60,7 @@ public abstract class AbstractServerMojo extends AbstractMojo implements Logger 
      * @return A {@link Monitor} object.
      */
     public Monitor createMonitor() {
-        return new Monitor(monitorKey, monitorPort);
+        return new Monitor(monitorKey, monitorPort, monitorRetryCount, monitorRetryInterval);
     }
 
     /**
