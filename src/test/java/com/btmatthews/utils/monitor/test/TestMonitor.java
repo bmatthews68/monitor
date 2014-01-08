@@ -186,7 +186,7 @@ public class TestMonitor {
      */
     @Test
     public void testRunMonitorWithIOException() throws Exception {
-        whenNew(ServerSocket.class).withArguments(eq(10000), eq(1), any(InetAddress.class)).thenThrow(new IOException());
+        whenNew(ServerSocket.class).withNoArguments().thenThrow(new IOException());
         final Monitor monitor = new Monitor("test", 10000);
         monitor.runMonitor(server, logger, observer);
         verify(logger).logError(eq("Error starting or stopping the monitor"), any(IOException.class));

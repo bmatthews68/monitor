@@ -18,6 +18,7 @@ package com.btmatthews.utils.monitor;
 
 import java.io.*;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.regex.Matcher;
@@ -122,9 +123,8 @@ public final class Monitor {
      */
     public void runMonitor(final Server server, final Logger logger, final MonitorObserver observer) {
         try {
-            final ServerSocket serverSocket = new ServerSocket(monitorPort, 1, InetAddress.getLocalHost());
+            final ServerSocket serverSocket = bindMonitor();
             try {
-                serverSocket.setReuseAddress(true);
                 server.start(logger);
                 if (waitForStart(server, logger)) {
                     observer.started(server, logger);
@@ -223,7 +223,7 @@ public final class Monitor {
     public void sendCommand(final String command, final Logger logger) {
         try {
             logger.logInfo("Sending command \"" + command + "\" to monitor");
-            final Socket socket = new Socket(InetAddress.getLocalHost(), monitorPort);
+            final Socket socket = connectMonitor();
             try {
                 socket.setSoLinger(false, 0);
                 final OutputStream outputStream = socket.getOutputStream();
@@ -254,10 +254,10 @@ public final class Monitor {
      * @param command The command.
      * @param logger  Used to log error messages.
      * @return Indicates whether or not the monitor is should continue running.
-     *         <ul>
-     *         <li>{@code true} if the monitor should continue running</li>
-     *         <li>{@code false} if the monitor should stop</li>
-     *         </ul>
+     * <ul>
+     * <li>{@code true} if the monitor should continue running</li>
+     * <li>{@code false} if the monitor should stop</li>
+     * </ul>
      */
     private boolean executeCommand(final Server server, final String command,
                                    final Logger logger) {
@@ -319,5 +319,40 @@ public final class Monitor {
             }
         }
         return false;
+    }
+
+    /**
+     * Bind to the monitor first attempting to use {@link java.net.InetAddress#getLocalHost()} then falling
+     * back to using the loopback address if there is a security exception.
+     *
+     * @return The bound server socket.
+     * @throws IOException If there was a problem binding to the server socket.
+     * @since 2.1.2
+     */
+    private ServerSocket bindMonitor() throws IOException {
+        final ServerSocket serverSocket = new ServerSocket();
+        serverSocket.setReuseAddress(true);
+        try {
+            serverSocket.bind(new InetSocketAddress(InetAddress.getLocalHost(), monitorPort), 1);
+        } catch (final SecurityException e) {
+            serverSocket.bind(new InetSocketAddress("localhost", monitorPort), 1);
+        }
+        return serverSocket;
+    }
+
+    /**
+     * Connect to the monitor first attempting to use {@link java.net.InetAddress#getLocalHost()} then falling
+     * back to using the loopback address if there is a security exception.
+     *
+     * @return The connected  socket.
+     * @throws IOException If there was a problem connecting to the socket.
+     * @since 2.1.2
+     */
+    private Socket connectMonitor() throws IOException {
+        try {
+            return new Socket(InetAddress.getLocalHost(), monitorPort);
+        } catch (final SecurityException e) {
+            return new Socket("localhost", monitorPort);
+        }
     }
 }
