@@ -65,8 +65,6 @@ public class TestServerFactoryLocator {
 
     /**
      * Verify that {@link ServerFactoryLocator#getInstance(com.btmatthews.utils.monitor.Logger)} returns a singleton.
-     *
-     * @throws Exception If the test case fails.
      */
     @Test
     public void testGetInstance() {

@@ -73,6 +73,8 @@ public class TestStopMojo {
 
     /**
      * Prepare for test case execution by initialising the mocks.
+     *
+     * @throws Exception If there was a problem preparing the test cases.
      */
     @Before
     public void setUp() throws Exception {
