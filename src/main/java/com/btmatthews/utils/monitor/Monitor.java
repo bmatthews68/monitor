@@ -17,10 +17,7 @@
 package com.btmatthews.utils.monitor;
 
 import java.io.*;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -334,7 +331,7 @@ public final class Monitor {
         serverSocket.setReuseAddress(true);
         try {
             serverSocket.bind(new InetSocketAddress(InetAddress.getLocalHost(), monitorPort), 1);
-        } catch (final SecurityException e) {
+        } catch (final BindException e) {
             serverSocket.bind(new InetSocketAddress("localhost", monitorPort), 1);
         }
         return serverSocket;
@@ -351,7 +348,7 @@ public final class Monitor {
     private Socket connectMonitor() throws IOException {
         try {
             return new Socket(InetAddress.getLocalHost(), monitorPort);
-        } catch (final SecurityException e) {
+        } catch (final ConnectException e) {
             return new Socket("localhost", monitorPort);
         }
     }
