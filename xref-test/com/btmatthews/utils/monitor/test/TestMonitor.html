@@ -196,7 +196,7 @@
 <a class="jxr_linenumber" name="186" href="#186">186</a> <em class="jxr_javadoccomment">     */</em>
 <a class="jxr_linenumber" name="187" href="#187">187</a>     @Test
 <a class="jxr_linenumber" name="188" href="#188">188</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testRunMonitorWithIOException() <strong class="jxr_keyword">throws</strong> Exception {
-<a class="jxr_linenumber" name="189" href="#189">189</a>         whenNew(ServerSocket.<strong class="jxr_keyword">class</strong>).withArguments(eq(10000), eq(1), any(InetAddress.<strong class="jxr_keyword">class</strong>)).thenThrow(<strong class="jxr_keyword">new</strong> IOException());
+<a class="jxr_linenumber" name="189" href="#189">189</a>         whenNew(ServerSocket.<strong class="jxr_keyword">class</strong>).withNoArguments().thenThrow(<strong class="jxr_keyword">new</strong> IOException());
 <a class="jxr_linenumber" name="190" href="#190">190</a>         <strong class="jxr_keyword">final</strong> Monitor monitor = <strong class="jxr_keyword">new</strong> Monitor(<span class="jxr_string">"test"</span>, 10000);
 <a class="jxr_linenumber" name="191" href="#191">191</a>         monitor.runMonitor(server, logger, observer);
 <a class="jxr_linenumber" name="192" href="#192">192</a>         verify(logger).logError(eq(<span class="jxr_string">"Error starting or stopping the monitor"</span>), any(IOException.<strong class="jxr_keyword">class</strong>));
