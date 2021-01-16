@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2012 Brian Matthews
+ * Copyright 2011-2021 Brian Matthews
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public final class ServerFactoryLocator {
     /**
      * Registered factories keyed by their server name.
      */
-    private final Map<String, ServerFactory> serverFactoryMapping = new HashMap<String, ServerFactory>();
+    private final Map<String, ServerFactory> serverFactoryMapping = new HashMap<>();
 
     /**
      * The constructor that scans the classpath and registers all available

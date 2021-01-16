@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2012 Brian Matthews
+ * Copyright 2011-2021 Brian Matthews
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,21 @@
 
 package com.btmatthews.utils.monitor;
 
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.Writer;
+import java.net.BindException;
+import java.net.ConnectException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -65,14 +78,14 @@ public final class Monitor {
      *
      * @since 2.1.0
      */
-    private int retryCount;
+    private final int retryCount;
     /**
      * The interval between retries when checking for successful server start
      * or stop.
      *
      * @since 2.1.0
      */
-    private int retryInterval;
+    private final int retryInterval;
 
     /**
      * The constructor that initialises the monitor key and port.
@@ -119,19 +132,14 @@ public final class Monitor {
      * @param observer Used to handle notifications for server start and stop.
      */
     public void runMonitor(final Server server, final Logger logger, final MonitorObserver observer) {
-        try {
-            final ServerSocket serverSocket = bindMonitor();
-            try {
-                server.start(logger);
-                if (waitForStart(server, logger)) {
-                    observer.started(server, logger);
-                    runMonitorInternal(server, logger, serverSocket);
-                    if (waitForStop(server, logger)) {
-                        observer.stopped(server, logger);
-                    }
+        try (final ServerSocket serverSocket = bindMonitor()) {
+            server.start(logger);
+            if (waitForStart(server, logger)) {
+                observer.started(server, logger);
+                runMonitorInternal(server, logger, serverSocket);
+                if (waitForStop(server, logger)) {
+                    observer.stopped(server, logger);
                 }
-            } finally {
-                serverSocket.close();
             }
         } catch (final IOException exception) {
             logger.logError("Error starting or stopping the monitor", exception);
@@ -147,11 +155,7 @@ public final class Monitor {
      * @return The thread that was spawned to run the monitor.
      */
     public Thread runMonitorDaemon(final Server server, final Logger logger, final MonitorObserver observer) {
-        final Thread monitorThread = new Thread(new Runnable() {
-            public void run() {
-                Monitor.this.runMonitor(server, logger, observer);
-            }
-        });
+        final Thread monitorThread = new Thread(() -> Monitor.this.runMonitor(server, logger, observer));
         monitorThread.setDaemon(true);
         monitorThread.start();
         waitForStart(server, logger);
@@ -218,21 +222,15 @@ public final class Monitor {
      * @param logger  Used to log error messages.
      */
     public void sendCommand(final String command, final Logger logger) {
-        try {
-            logger.logInfo("Sending command \"" + command + "\" to monitor");
-            final Socket socket = connectMonitor();
-            try {
-                socket.setSoLinger(false, 0);
-                final OutputStream outputStream = socket.getOutputStream();
-                final Writer writer = new OutputStreamWriter(outputStream);
-                final PrintWriter printWriter = new PrintWriter(writer);
-                printWriter.println(monitorKey);
-                printWriter.println(command);
-                printWriter.flush();
-                socket.close();
-            } finally {
-                socket.close();
-            }
+        logger.logInfo("Sending command \"" + command + "\" to monitor");
+        try (final Socket socket = connectMonitor()) {
+            socket.setSoLinger(false, 0);
+            final OutputStream outputStream = socket.getOutputStream();
+            final Writer writer = new OutputStreamWriter(outputStream);
+            final PrintWriter printWriter = new PrintWriter(writer);
+            printWriter.println(monitorKey);
+            printWriter.println(command);
+            printWriter.flush();
         } catch (final IOException exception) {
             logger.logError("Error sending command to monitor", exception);
         }

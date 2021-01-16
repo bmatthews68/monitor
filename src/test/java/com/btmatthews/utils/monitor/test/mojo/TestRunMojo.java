@@ -1,29 +1,30 @@
 package com.btmatthews.utils.monitor.test.mojo;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import com.btmatthews.utils.monitor.Logger;
+import com.btmatthews.utils.monitor.Monitor;
+import com.btmatthews.utils.monitor.mojo.AbstractRunMojo;
+import com.btmatthews.utils.monitor.test.AbstractMonitorTest;
+import org.apache.maven.plugin.logging.Log;
+import org.codehaus.plexus.util.ReflectionUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 
-import com.btmatthews.utils.monitor.Logger;
-import com.btmatthews.utils.monitor.Monitor;
-import com.btmatthews.utils.monitor.Server;
-import com.btmatthews.utils.monitor.mojo.AbstractRunMojo;
-import org.apache.maven.plugin.logging.Log;
-import org.codehaus.plexus.util.ReflectionUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit test {@link AbstractRunMojo}.
@@ -31,7 +32,8 @@ import org.mockito.Mock;
  * @author <a href="mailto:brian@btmatthews.com">Brian Matthews</a>
  * @since 1.1.0
  */
-public class TestRunMojo {
+@ExtendWith(MockitoExtension.class)
+class TestRunMojo extends AbstractMonitorTest {
 
     /**
      * Used for testing the logging methods.
@@ -41,7 +43,7 @@ public class TestRunMojo {
     /**
      * The abstract base class being tested.
      */
-    @Mock
+    @Spy
     private AbstractRunMojo mojo;
 
     /**
@@ -61,22 +63,8 @@ public class TestRunMojo {
      *
      * @throws Exception If there was an error.
      */
-    @Before
-    public void setUp() throws Exception {
-        initMocks(this);
-        final Map<String, Object> config = new HashMap<String, Object>();
-        config.put("debug", Boolean.FALSE);
-        when(mojo.getLog()).thenReturn(log);
-        when(mojo.getServerType()).thenReturn("dummy");
-        when(mojo.getServerConfig()).thenReturn(config);
-        doCallRealMethod().when(mojo).createMonitor();
-        doCallRealMethod().when(mojo).logInfo(anyString());
-        doCallRealMethod().when(mojo).logInfo(anyString());
-        doCallRealMethod().when(mojo).logError(anyString());
-        doCallRealMethod().when(mojo).logError(anyString(), any(Exception.class));
-        doCallRealMethod().when(mojo).started(any(Server.class), any(Logger.class));
-        doCallRealMethod().when(mojo).stopped(any(Server.class), any(Logger.class));
-        doCallRealMethod().when(mojo).execute();
+    @BeforeEach
+    void setUp() throws Exception {
         ReflectionUtils.setVariableValueInObject(mojo, "monitorPort", 10000);
         ReflectionUtils.setVariableValueInObject(mojo, "monitorKey", "dummy");
     }
@@ -85,27 +73,42 @@ public class TestRunMojo {
      * Verify that {@link Logger#logInfo(String)} has been implemented.
      */
     @Test
-    public void testLogInfo() {
+    void testLogInfo() {
+        doCallRealMethod().when(mojo).logInfo(anyString());
+        when(mojo.getLog()).thenReturn(log);
         mojo.logInfo(MESSAGE);
         verify(log).info(eq(MESSAGE));
+        verify(mojo).logInfo(MESSAGE);
+        verify(mojo).getLog();
+        verifyNoMoreInteractions(log, mojo);
     }
 
     /**
      * Verify that {@link Logger#logError(String)} has been implemented.
      */
     @Test
-    public void testLogError() {
+    void testLogError() {
+        doCallRealMethod().when(mojo).logError(anyString());
+        when(mojo.getLog()).thenReturn(log);
         mojo.logError(MESSAGE);
-        verify(log).error(eq(MESSAGE));
+        verify(log).error(MESSAGE);
+        verify(mojo).logError(MESSAGE);
+        verify(mojo).getLog();
+        verifyNoMoreInteractions(log, mojo);
     }
 
     /**
      * Verify that {@link Logger#logError(String, Throwable)} has been implemented.
      */
     @Test
-    public void testLogErrorAndException() {
+    void testLogErrorAndException() {
+        doCallRealMethod().when(mojo).logError(anyString(), any());
+        when(mojo.getLog()).thenReturn(log);
         mojo.logError(MESSAGE, exception);
         verify(log).error(eq(MESSAGE), same(exception));
+        verify(mojo).logError(eq(MESSAGE), same(exception));
+        verify(mojo).getLog();
+        verifyNoMoreInteractions(log, mojo);
     }
 
     /**
@@ -114,25 +117,21 @@ public class TestRunMojo {
      * @throws Exception If there was an error.
      */
     @Test
-    public void testRun() throws Exception {
+    void testRun() throws Exception {
+        final Map<String, Object> config = new HashMap<>();
+        config.put("debug", Boolean.FALSE);
+        when(mojo.getServerType()).thenReturn("dummy");
+        when(mojo.getServerConfig()).thenReturn(config);
         ReflectionUtils.setVariableValueInObject(mojo, "daemon", Boolean.FALSE);
-        final Thread mojoThread = new Thread(new Runnable() {
-            public void run() {
-                try {
-                    mojo.execute();
-                } catch (final Exception e) {
-                }
+        final Thread mojoThread = new Thread(() -> {
+            try {
+                mojo.execute();
+            } catch (final Exception e) {
             }
         });
         mojoThread.start();
 
-        final Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                signalStop();
-            }
-        }, 5000L);
+        runWithDelay(this::signalStop);
 
         mojoThread.join(15000L);
     }
@@ -143,7 +142,9 @@ public class TestRunMojo {
      * @throws Exception If there was an error.
      */
     @Test
-    public void testRunDaemon() throws Exception {
+    void testRunDaemon() throws Exception {
+        when(mojo.getServerType()).thenReturn("dummy");
+        doCallRealMethod().when(mojo).execute();
         ReflectionUtils.setVariableValueInObject(mojo, "daemon", Boolean.TRUE);
         mojo.execute();
         Thread.sleep(5000L);

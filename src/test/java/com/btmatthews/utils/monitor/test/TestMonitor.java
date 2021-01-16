@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2012 Brian Matthews
+ * Copyright 2011-2021 Brian Matthews
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,35 +16,26 @@
 
 package com.btmatthews.utils.monitor.test;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.validateMockitoUsage;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.when;
-import static org.powermock.api.mockito.PowerMockito.whenNew;
-
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import com.btmatthews.utils.monitor.Logger;
 import com.btmatthews.utils.monitor.Monitor;
 import com.btmatthews.utils.monitor.MonitorObserver;
 import com.btmatthews.utils.monitor.Server;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit test the monitor.
@@ -52,9 +43,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
  * @author <a href="mailto:brian@btmatthews.com">Brian Matthews</a>
  * @version 1.0.0
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ Monitor.class })
-public class TestMonitor {
+@ExtendWith(MockitoExtension.class)
+public class TestMonitor extends AbstractMonitorTest {
 
     /**
      * Mock the server test fixture.
@@ -75,43 +65,28 @@ public class TestMonitor {
     private MonitorObserver observer;
 
     /**
-     * Initialise the mock test fixtures.
-     */
-    @Before
-    public void setUp() {
-        initMocks(this);
-        when(server.isStarted(any(Logger.class))).thenReturn(true);
-        when(server.isStopped(any(Logger.class))).thenReturn(true);
-    }
-
-    /**
      * Verify that a monitor can be started and stopped successfully.
      *
      * @throws Exception If the test case fails.
      */
     @Test
-    public void testMonitor() throws Exception {
+    void testMonitor() throws Exception {
+        when(server.isStarted(any(Logger.class))).thenReturn(true);
+        when(server.isStopped(any(Logger.class))).thenReturn(true);
         final Monitor monitor = new Monitor("test", 10000);
         final Thread monitorThread = monitor.runMonitorDaemon(server, logger, observer);
-        final Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                monitor.sendCommand("stop", logger);
-            }
-        }, 5000L);
-        monitorThread.join(10000L);
-        verify(server).start(same(logger));
-        verify(server, times(2)).isStarted(same(logger));
-        verify(logger).logInfo(eq("Waiting for command from client"));
-        verify(logger).logInfo(eq("Sending command \"stop\" to monitor"));
-        verify(logger).logInfo(eq("Receiving command from client"));
-        verify(server).stop(same(logger));
-        verify(server).isStopped(same(logger));
-        verify(observer).started(same(server), same(logger));
-        verify(observer).stopped(same(server), same(logger));
+        runWithDelay(() -> monitor.sendCommand("stop", logger));
+        monitorThread.join(15000L);
+        verify(server).start(logger);
+        verify(server, times(2)).isStarted(logger);
+        verify(logger).logInfo("Waiting for command from client");
+        verify(logger).logInfo("Sending command \"stop\" to monitor");
+        verify(logger).logInfo("Receiving command from client");
+        verify(server).stop(logger);
+        verify(server).isStopped(logger);
+        verify(observer).started(server, logger);
+        verify(observer).stopped(server, logger);
         verifyNoMoreInteractions(logger, server, observer);
-        validateMockitoUsage();
     }
 
     /**
@@ -120,31 +95,28 @@ public class TestMonitor {
      * @throws Exception If the test case fails.
      */
     @Test
-    public void testMonitorConfigure() throws Exception {
+    void testMonitorConfigure() throws Exception {
+        when(server.isStarted(any(Logger.class))).thenReturn(true);
+        when(server.isStopped(any(Logger.class))).thenReturn(true);
         final Monitor monitor = new Monitor("test", 10000);
         final Thread monitorThread = monitor.runMonitorDaemon(server, logger, observer);
-        final Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Monitor.sendCommand("test", 10000, "configure debug=off", logger);
-                Monitor.sendCommand("test", 10000, "stop", logger);
-            }
-        }, 5000L);
-        monitorThread.join(10000L);
-        verify(server).start(same(logger));
-        verify(server, times(2)).isStarted(same(logger));
-        verify(logger, times(2)).logInfo(eq("Waiting for command from client"));
-        verify(logger).logInfo(eq("Sending command \"configure debug=off\" to monitor"));
-        verify(logger).logInfo(eq("Sending command \"stop\" to monitor"));
-        verify(logger, times(2)).logInfo(eq("Receiving command from client"));
-        verify(server).configure(eq("debug"), eq("off"), same(logger));
-        verify(server).stop(same(logger));
-        verify(server).isStopped(same(logger));
-        verify(observer).started(same(server), same(logger));
-        verify(observer).stopped(same(server), same(logger));
+        runWithDelay(() -> {
+            Monitor.sendCommand("test", 10000, "configure debug=off", logger);
+            Monitor.sendCommand("test", 10000, "stop", logger);
+        });
+        monitorThread.join(15000L);
+        verify(server).start(logger);
+        verify(server, times(2)).isStarted(logger);
+        verify(logger, times(2)).logInfo("Waiting for command from client");
+        verify(logger).logInfo("Sending command \"configure debug=off\" to monitor");
+        verify(logger).logInfo("Sending command \"stop\" to monitor");
+        verify(logger, times(2)).logInfo("Receiving command from client");
+        verify(server).configure("debug","off", logger);
+        verify(server).stop(logger);
+        verify(server).isStopped(logger);
+        verify(observer).started(server, logger);
+        verify(observer).stopped(server, logger);
         verifyNoMoreInteractions(logger, server, observer);
-        validateMockitoUsage();
     }
 
     /**
@@ -153,44 +125,46 @@ public class TestMonitor {
      * @throws Exception If the test case fails.
      */
     @Test
-    public void testInvalidMonitorKey() throws Exception {
+    void testInvalidMonitorKey() throws Exception {
+        when(server.isStarted(any(Logger.class))).thenReturn(true);
+        when(server.isStopped(any(Logger.class))).thenReturn(true);
         final Monitor monitor = new Monitor("test", 10000);
         final Thread monitorThread = monitor.runMonitorDaemon(server, logger, observer);
-        final Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Monitor.sendCommand("TEST", 10000, "stop", logger);
-                Monitor.sendCommand("test", 10000, "stop", logger);
-            }
-        }, 5000L);
-        monitorThread.join(10000L);
-        verify(server).start(same(logger));
-        verify(server, times(2)).isStarted(same(logger));
-        verify(logger, times(2)).logInfo(eq("Waiting for command from client"));
-        verify(logger, times(2)).logInfo(eq("Sending command \"stop\" to monitor"));
-        verify(logger, times(2)).logInfo(eq("Receiving command from client"));
-        verify(logger).logError(eq("Invalid monitor key"));
-        verify(server).stop(same(logger));
-        verify(server).isStopped(same(logger));
-        verify(observer).started(same(server), same(logger));
-        verify(observer).stopped(same(server), same(logger));
+        runWithDelay(() -> {
+            Monitor.sendCommand("TEST", 10000, "stop", logger);
+            Monitor.sendCommand("test", 10000, "stop", logger);
+        });
+        monitorThread.join(15000L);
+        verify(server).start(logger);
+        verify(server, times(2)).isStarted(logger);
+        verify(logger, times(2)).logInfo("Waiting for command from client");
+        verify(logger, times(2)).logInfo("Sending command \"stop\" to monitor");
+        verify(logger, times(2)).logInfo("Receiving command from client");
+        verify(logger).logError("Invalid monitor key");
+        verify(server).stop(logger);
+        verify(server).isStopped(logger);
+        verify(observer).started(server, logger);
+        verify(observer).stopped(server, logger);
         verifyNoMoreInteractions(logger, server, observer);
-        validateMockitoUsage();
     }
 
     /**
      * Verify that the monitor will log an error if it could nt open a TCP port.
      *
-     * @throws Exception If the test case fails.
+     * @throws IOException If the test case fails.
      */
     @Test
-    public void testRunMonitorWithIOException() throws Exception {
-        whenNew(ServerSocket.class).withNoArguments().thenThrow(new IOException());
-        final Monitor monitor = new Monitor("test", 10000);
-        monitor.runMonitor(server, logger, observer);
-        verify(logger).logError(eq("Error starting or stopping the monitor"), any(IOException.class));
-        verifyNoMoreInteractions(logger, server, observer);
-        validateMockitoUsage();
+    void testRunMonitorWithIOException() throws IOException {
+        try (final ServerSocket serverSocket1 = new ServerSocket();
+             final ServerSocket serverSocket2 = new ServerSocket()) {
+            serverSocket1.setReuseAddress(true);
+            serverSocket2.setReuseAddress(true);
+            serverSocket1.bind(new InetSocketAddress(InetAddress.getLocalHost(), 10000), 1);
+            serverSocket2.bind(new InetSocketAddress("localhost", 10000), 1);
+            final Monitor monitor = new Monitor("test", 10000);
+            monitor.runMonitor(server, logger, observer);
+            verify(logger).logError(eq("Error starting or stopping the monitor"), any(IOException.class));
+            verifyNoMoreInteractions(logger, server, observer);
+        }
     }
 }

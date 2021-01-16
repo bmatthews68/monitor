@@ -5,28 +5,24 @@ import com.btmatthews.utils.monitor.Monitor;
 import com.btmatthews.utils.monitor.MonitorObserver;
 import com.btmatthews.utils.monitor.Server;
 import com.btmatthews.utils.monitor.mojo.AbstractStopMojo;
+import com.btmatthews.utils.monitor.test.AbstractMonitorTest;
 import org.apache.maven.plugin.logging.Log;
 import org.codehaus.plexus.util.ReflectionUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.util.Timer;
-import java.util.TimerTask;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.whenNew;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for the Mojo that implements the stop goal.
@@ -34,10 +30,21 @@ import static org.powermock.api.mockito.PowerMockito.whenNew;
  * @author <a href="mailto:brian@btmatthews.com">Brian Matthews</a>
  * @since 1.1.0
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({AbstractStopMojo.class})
-public class TestStopMojo {
+@ExtendWith(MockitoExtension.class)
+class TestStopMojo extends AbstractMonitorTest {
 
+    /**
+     * Spy test fixture.
+     */
+    @Spy
+    private final AbstractStopMojo mojo = new AbstractStopMojo() {
+    };
+    /**
+     * Spy test fixture.
+     */
+    @Spy
+    private final AbstractStopMojo wrongMojo = new AbstractStopMojo() {
+    };
     /**
      * Mock for the LDAP server.
      */
@@ -58,52 +65,30 @@ public class TestStopMojo {
      */
     @Mock
     private Log log;
-    /**
-     * Spy test fixture.
-     */
-    @Spy
-    private AbstractStopMojo mojo = new AbstractStopMojo() {
-    };
-    /**
-     * Spy test fixture.
-     */
-    @Spy
-    private AbstractStopMojo wrongMojo = new AbstractStopMojo() {
-    };
 
     /**
      * Prepare for test case execution by initialising the mocks.
      *
      * @throws Exception If there was a problem preparing the test cases.
      */
-    @Before
-    public void setUp() throws Exception {
-        initMocks(this);
+    @BeforeEach
+    void setUp() throws Exception {
         ReflectionUtils.setVariableValueInObject(mojo, "monitorPort", 10000);
         ReflectionUtils.setVariableValueInObject(mojo, "monitorKey", "dummy");
         ReflectionUtils.setVariableValueInObject(wrongMojo, "monitorPort", 10000);
         ReflectionUtils.setVariableValueInObject(wrongMojo, "monitorKey", "jester");
-        when(mojo.getLog()).thenReturn(log);
-        when(wrongMojo.getLog()).thenReturn(log);
-        when(server.isStarted(any(Logger.class))).thenReturn(true);
-        when(server.isStopped(any(Logger.class))).thenReturn(true);
     }
 
     /**
      * Verify that stop logs an error if there is no monitor running.
-     *
-     * @throws Exception If there was an error.
      */
     @Test
-    public void testStopWithNoServer() throws Exception {
-        whenNew(Socket.class)
-                .withParameterTypes(InetAddress.class, int.class)
-                .withArguments(any(InetAddress.class), eq(10000))
-                .thenThrow(new IOException());
+    void testStopWithNoServer() {
+        when(mojo.getLog()).thenReturn(log);
         mojo.execute();
-        verify(log).info(eq("Sending command \"stop\" to monitor"));
+        verify(log).info("Sending command \"stop\" to monitor");
         verify(log).error(eq("Error sending command to monitor"), any(IOException.class));
-        verifyZeroInteractions(server, logger, log, observer);
+        verifyNoMoreInteractions(server, logger, log, observer);
     }
 
     /**
@@ -112,32 +97,24 @@ public class TestStopMojo {
      * @throws Exception If the test case failed.
      */
     @Test
-    public void testStopWithRunningServer() throws Exception {
+    void testStopWithRunningServer() throws Exception {
+        when(mojo.getLog()).thenReturn(log);
+        when(server.isStarted(any(Logger.class))).thenReturn(true);
+        when(server.isStopped(any(Logger.class))).thenReturn(true);
         final Monitor monitor = new Monitor("dummy", 10000);
         final Thread monitorThread = monitor.runMonitorDaemon(server, logger, observer);
-        final Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                try {
-                    mojo.execute();
-                } catch (final Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }, 5000L);
+        runWithDelay(mojo::execute);
         monitorThread.join(15000L);
-        verify(server).start(same(logger));
-        verify(server, times(2)).isStarted(same(logger));
-        verify(logger).logInfo(eq("Waiting for command from client"));
-        verify(log).info(eq("Sending command \"stop\" to monitor"));
-        verify(logger).logInfo(eq("Receiving command from client"));
-        verify(server).stop(same(logger));
-        verify(server).isStopped(same(logger));
-        verify(observer).started(same(server), same(logger));
-        verify(observer).stopped(same(server), same(logger));
-        verifyZeroInteractions(server, logger, log, observer);
-        validateMockitoUsage();
+        verify(server).start(logger);
+        verify(server, times(2)).isStarted(logger);
+        verify(logger).logInfo("Waiting for command from client");
+        verify(log).info("Sending command \"stop\" to monitor");
+        verify(logger).logInfo("Receiving command from client");
+        verify(server).stop(logger);
+        verify(server).isStopped(logger);
+        verify(observer).started(server, logger);
+        verify(observer).stopped(server, logger);
+        verifyNoMoreInteractions(server, logger, log, observer);
     }
 
     /**
@@ -146,33 +123,28 @@ public class TestStopMojo {
      * @throws Exception If the unit test failed.
      */
     @Test
-    public void testStopWithWrongMojo() throws Exception {
+    void testStopWithWrongMojo() throws Exception {
+        when(mojo.getLog()).thenReturn(log);
+        when(wrongMojo.getLog()).thenReturn(log);
+        when(server.isStarted(any(Logger.class))).thenReturn(true);
+        when(server.isStopped(any(Logger.class))).thenReturn(true);
         final Monitor monitor = new Monitor("dummy", 10000);
         final Thread monitorThread = monitor.runMonitorDaemon(server, logger, observer);
-        final Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                try {
-                    wrongMojo.execute();
-                    mojo.execute();
-                } catch (final Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }, 5000L);
+        runWithDelay(() -> {
+            wrongMojo.execute();
+            mojo.execute();
+        });
         monitorThread.join(15000L);
-        verify(server).start(same(logger));
-        verify(server, times(2)).isStarted(same(logger));
-        verify(logger, times(2)).logInfo(eq("Waiting for command from client"));
-        verify(log, times(2)).info(eq("Sending command \"stop\" to monitor"));
-        verify(logger, times(2)).logInfo(eq("Receiving command from client"));
-        verify(logger).logError(eq("Invalid monitor key"));
-        verify(server).stop(same(logger));
-        verify(server).isStopped(same(logger));
-        verify(observer).started(same(server), same(logger));
-        verify(observer).stopped(same(server), same(logger));
-        verifyZeroInteractions(server, logger, log, observer);
-        validateMockitoUsage();
+        verify(server).start(logger);
+        verify(server, times(2)).isStarted(logger);
+        verify(logger, times(2)).logInfo("Waiting for command from client");
+        verify(log, times(2)).info("Sending command \"stop\" to monitor");
+        verify(logger, times(2)).logInfo("Receiving command from client");
+        verify(logger).logError("Invalid monitor key");
+        verify(server).stop(logger);
+        verify(server).isStopped(logger);
+        verify(observer).started(server, logger);
+        verify(observer).stopped(server, logger);
+        verifyNoMoreInteractions(server, logger, log, observer);
     }
 }

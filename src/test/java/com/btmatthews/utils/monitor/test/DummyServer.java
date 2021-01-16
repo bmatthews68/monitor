@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2012 Brian Matthews
+ * Copyright 2011-2021 Brian Matthews
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@
 package com.btmatthews.utils.monitor.test;
 
 import com.btmatthews.utils.monitor.AbstractServer;
-import com.btmatthews.utils.monitor.Logger;
-import com.btmatthews.utils.monitor.Server;
 
 /**
  * Implements a dummy server for unit testing.

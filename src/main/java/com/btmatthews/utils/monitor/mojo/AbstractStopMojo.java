@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2012 Brian Matthews
+ * Copyright 2011-2021 Brian Matthews
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package com.btmatthews.utils.monitor.mojo;
 
 import com.btmatthews.utils.monitor.Monitor;
-import org.apache.maven.plugin.MojoFailureException;
 
 /**
  * Implements the stop goal for plug-ins that use the Monitor framework.
@@ -30,12 +29,9 @@ public class AbstractStopMojo extends AbstractServerMojo {
     /**
      * Stop a running an embedded server by sending a {@code stop} command to the monitor that is controlling that
      * server.
-     *
-     * @throws org.apache.maven.plugin.MojoFailureException
-     *          If there was an error stopping the embedded server.
      */
     @Override
-    public void execute() throws MojoFailureException {
+    public void execute() {
         final Monitor monitor = createMonitor();
         monitor.sendCommand("stop", this);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2012 Brian Matthews
+ * Copyright 2011-2021 Brian Matthews
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import com.btmatthews.utils.monitor.MonitorObserver;
 import com.btmatthews.utils.monitor.Server;
 import com.btmatthews.utils.monitor.ServerFactory;
 import com.btmatthews.utils.monitor.ServerFactoryLocator;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
 
 /**
@@ -79,11 +78,9 @@ public abstract class AbstractRunMojo extends AbstractServerMojo implements Moni
 
     /**
      * Execute the Maven goal by creating a the server, configuring it and then running it with the monitor.
-     *
-     * @throws MojoFailureException If there was an error executing the goal.
      */
     @Override
-    public void execute() throws MojoFailureException {
+    public void execute() {
 
         // Create the server
 
