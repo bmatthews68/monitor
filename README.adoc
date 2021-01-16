@@ -1,1 +1,20 @@
 = Monitor
+
+A simple monitor thread used to control server processes with optional support for  creating Maven plugins
+
+== Maven Central Coordinates
+
+*Monitor* has been published in [Maven Central](http://search.maven.org) at the following coordinates:
+
+[source,xml]
+----
+<dependency>
+    <groupId>com.btmatthews.utils</groupId>
+    <artifactId>monitor</artifactId>
+    <version>3.0.0</version>
+</dependency>
+----
+
+== License & Source Code
+
+The *Monitor* is made available under the http://www.apache.org/licenses/LICENSE-2.0.html[Apache License] and the source code is hosted on http://github.com[GitHub] at https://github.com/bmatthews68/monitor.
