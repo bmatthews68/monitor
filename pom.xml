@@ -197,7 +197,7 @@
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>3.1.1</version>
                 <configuration>
-                    <configLocation>config/sun_checks.xml</configLocation>
+                    <configLocation>sun_checks.xml</configLocation>
                 </configuration>
             </plugin>
             <plugin>
@@ -300,7 +300,8 @@
     <distributionManagement>
         <site>
             <id>gh-pages</id>
-            <url>gitsite:git@github.com/bmatthews68/monitor.git</url>
+            <name>Monitor GitHub Pages</name>
+            <url>git:ssh://git@github.com/bmatthews68/monitor.git?gh-pages#</url>
         </site>
         <repository>
             <id>releases.sonatype</id>
