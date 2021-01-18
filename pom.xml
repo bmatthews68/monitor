@@ -21,7 +21,7 @@
     </prerequisites>
     <groupId>com.btmatthews.utils</groupId>
     <artifactId>monitor</artifactId>
-    <version>3.0.0</version>
+    <version>3.0.1-SNAPSHOT</version>
     <name>Monitor Thread</name>
     <description>A simple monitor thread used to control server processes with optional support for
         creating Maven plugins
@@ -285,7 +285,7 @@
         <connection>scm:git:git@github.com:bmatthews68/monitor.git</connection>
         <url>scm:git:git@github.com:bmatthews68/monitor.git</url>
         <developerConnection>scm:git:git@github.com:bmatthews68/monitor.git</developerConnection>
-        <tag>3.0.0</tag>
+        <tag>HEAD</tag>
     </scm>
     <url>http://monitor.btmatthews.com</url>
     <organization>
