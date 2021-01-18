@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractRunMojo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Monitor Thread</a> &gt; <a href="index.source.html" class="el_package">com.btmatthews.utils.monitor.mojo</a> &gt; <span class="el_source">AbstractRunMojo.java</span></div><h1>AbstractRunMojo.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2021 Brian Matthews
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.btmatthews.utils.monitor.mojo;
+
+import java.util.Map;
+
+import com.btmatthews.utils.monitor.Logger;
+import com.btmatthews.utils.monitor.Monitor;
+import com.btmatthews.utils.monitor.MonitorObserver;
+import com.btmatthews.utils.monitor.Server;
+import com.btmatthews.utils.monitor.ServerFactory;
+import com.btmatthews.utils.monitor.ServerFactoryLocator;
+import org.apache.maven.plugins.annotations.Parameter;
+
+/**
+ * Abstract base class for mojos that implement the run goal for plug-ins that use the Monitor framework.
+ *
+ * @author &lt;a href=&quot;mailto:brian@btmatthews.com&quot;&gt;Brian Matthews&lt;/a&gt;
+ * @since 1.1.0
+ */
+<span class="fc" id="L35">public abstract class AbstractRunMojo extends AbstractServerMojo implements MonitorObserver {</span>
+
+    /**
+     * If {@code true} the server is run as a daemon.
+     */
+    @Parameter(property = &quot;monitor.daemon&quot;, defaultValue = &quot;false&quot;)
+    private boolean daemon;
+
+    /**
+     * Concrete classes should override this method to return the server type name.
+     *
+     * @return The server type name.
+     */
+    public abstract String getServerType();
+
+    /**
+     * Get the configuration parameters for the server.
+     *
+     * @return A {@link Map} containing the configuration paramters.
+     */
+    public abstract Map&lt;String, Object&gt; getServerConfig();
+
+    /**
+     * This callback is called after the server has started.
+     *
+     * @param server The server that was started.
+     * @param logger Used to log information and error messages.
+     * @see MonitorObserver#started(com.btmatthews.utils.monitor.Server, com.btmatthews.utils.monitor.Logger)
+     */
+    @Override
+    public void started(final Server server, final Logger logger) {
+<span class="fc" id="L66">    }</span>
+
+    /**
+     * This callback is called after the server has exited.
+     *
+     * @param server The server that was stopped.
+     * @param logger Used to log information and error messages.
+     * @see MonitorObserver#stopped(com.btmatthews.utils.monitor.Server, com.btmatthews.utils.monitor.Logger)
+     */
+    @Override
+    public void stopped(final Server server, final Logger logger) {
+<span class="fc" id="L77">    }</span>
+
+    /**
+     * Execute the Maven goal by creating a the server, configuring it and then running it with the monitor.
+     */
+    @Override
+    public void execute() {
+
+        // Create the server
+
+<span class="fc" id="L87">        final ServerFactoryLocator locator = ServerFactoryLocator.getInstance(this);</span>
+<span class="fc" id="L88">        final ServerFactory factory = locator.getFactory(getServerType());</span>
+<span class="fc" id="L89">        final Server server = factory.createServer();</span>
+
+        // Configure the server
+
+<span class="fc" id="L93">        final Map&lt;String, Object&gt; config = getServerConfig();</span>
+<span class="fc bfc" id="L94" title="All 2 branches covered.">        for (final Map.Entry&lt;String, Object&gt; entry : config.entrySet()) {</span>
+<span class="fc" id="L95">            server.configure(entry.getKey(), entry.getValue(), this);</span>
+<span class="fc" id="L96">        }</span>
+
+        // Run the monitor
+
+<span class="fc" id="L100">        final Monitor monitor = createMonitor();</span>
+<span class="fc bfc" id="L101" title="All 2 branches covered.">        if (daemon) {</span>
+<span class="fc" id="L102">            monitor.runMonitorDaemon(server, this, this);</span>
+        } else {
+<span class="fc" id="L104">            monitor.runMonitor(server, this, this);</span>
+        }
+<span class="fc" id="L106">    }</span>
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

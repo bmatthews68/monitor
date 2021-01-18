@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractServer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Monitor Thread</a> &gt; <a href="index.source.html" class="el_package">com.btmatthews.utils.monitor</a> &gt; <span class="el_source">AbstractServer.java</span></div><h1>AbstractServer.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2021 Brian Matthews
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.btmatthews.utils.monitor;
+
+/**
+ * Abstract base class for objects that implement the {@link Server} interface. This abstract base class provides
+ * default implementations for the methods defined by the interface.
+ *
+ * @author &lt;a href=&quot;mailto:brian@btmatthews.com&quot;&gt;Brian Matthews&lt;/a&gt;
+ * @since 1.1.0
+ */
+<span class="fc" id="L26">public abstract class AbstractServer implements Server {</span>
+    /**
+     * Invoked by the monitor to configure a server property.
+     *
+     * @param name   The property name.
+     * @param value  The property value.
+     * @param logger Used to log error messages.
+     * @see com.btmatthews.utils.monitor.Server#configure(String, Object, com.btmatthews.utils.monitor.Logger)
+     */
+    public void configure(final String name, final Object value, final Logger logger) {
+<span class="fc" id="L36">    }</span>
+
+    /**
+     * Invoked by the monitor to launch the server.
+     *
+     * @param logger Used to log status and error messages.
+     * @see com.btmatthews.utils.monitor.Server#start(com.btmatthews.utils.monitor.Logger)
+     */
+    public void start(final Logger logger) {
+<span class="fc" id="L45">    }</span>
+
+    /**
+     * Invoked by the monitor to check if the server has launched. This default implementation
+     * always returns {@code true}.
+     *
+     * @param logger Used to log error messages.
+     * @return Always returns {@code true}.
+     * @since 2.1.0
+     */
+    public boolean isStarted(final Logger logger) {
+<span class="fc" id="L56">        return true;</span>
+    }
+
+    /**
+     * Invoked by the monitor to halt the server.
+     *
+     * @param logger Used to log status and error messages.
+     * @see com.btmatthews.utils.monitor.Server#start(com.btmatthews.utils.monitor.Logger)
+     */
+    public void stop(final Logger logger) {
+<span class="fc" id="L66">    }</span>
+
+    /**
+     * Invoked by the monitor to check if the server has halted.  The default implementation always
+     * returns {@code true}.
+     *
+     * @param logger Used to log error messages.
+     * @return Always returns {@code true}.
+     * @since 2.1.0
+     */
+    public boolean isStopped(final Logger logger) {
+<span class="fc" id="L77">        return true;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

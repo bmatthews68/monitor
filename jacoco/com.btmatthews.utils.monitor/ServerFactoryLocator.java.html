@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ServerFactoryLocator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Monitor Thread</a> &gt; <a href="index.source.html" class="el_package">com.btmatthews.utils.monitor</a> &gt; <span class="el_source">ServerFactoryLocator.java</span></div><h1>ServerFactoryLocator.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2021 Brian Matthews
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.btmatthews.utils.monitor;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.ServiceLoader;
+
+/**
+ * This locator object is a singleton that is used to obtain the factory that
+ * will be used to create server objects that can be controlled by a monitor.
+ *
+ * @author &lt;a href=&quot;mailto:brian@btmatthews.com&quot;&gt;Brian Matthews&lt;/a&gt;
+ * @since 1.0.0
+ */
+public final class ServerFactoryLocator {
+
+    /**
+     * The singleton instance of the locator.
+     */
+    private static ServerFactoryLocator instance;
+    /**
+     * Registered factories keyed by their server name.
+     */
+<span class="fc" id="L39">    private final Map&lt;String, ServerFactory&gt; serverFactoryMapping = new HashMap&lt;&gt;();</span>
+
+    /**
+     * The constructor that scans the classpath and registers all available
+     * factory objects.
+     *
+     * @param logger      Used to report status and error messages.
+     * @param classLoader The class loader used to scan the classpath for ServerFactory configurations.
+     */
+<span class="fc" id="L48">    public ServerFactoryLocator(final Logger logger, final ClassLoader classLoader) {</span>
+<span class="fc" id="L49">        final ServiceLoader&lt;ServerFactory&gt; loader = ServiceLoader.load(ServerFactory.class, classLoader);</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        for (final ServerFactory serverFactory : loader) {</span>
+<span class="fc" id="L51">            serverFactoryMapping.put(serverFactory.getServerName(), serverFactory);</span>
+<span class="fc" id="L52">        }</span>
+<span class="fc" id="L53">    }</span>
+
+    /**
+     * Get the singleton instance of the locator using the default class loader. If the singleton has not
+     * already been created it will be created and initialised as a side-effect.
+     *
+     * @param logger Used to report status and error messages.
+     * @return The singleton instance of the locator.
+     */
+    public static ServerFactoryLocator getInstance(final Logger logger) {
+<span class="fc" id="L63">        return getInstance(logger, ServerFactoryLocator.class.getClassLoader());</span>
+    }
+
+    /**
+     * Get the singleton instance of the locator using the specified class loader. If the singleton has not
+     * already been created it will be created and initialised as a side-effect.
+     *
+     * @param logger      Used to report status and error messages.
+     * @param classLoader The class loader used to scan the classpath for ServerFactory configurations.
+     * @return The singleton instance of the locator.
+     */
+    public static ServerFactoryLocator getInstance(final Logger logger, final ClassLoader classLoader) {
+<span class="fc bfc" id="L75" title="All 2 branches covered.">        if (instance == null) {</span>
+<span class="fc" id="L76">            instance = new ServerFactoryLocator(logger, classLoader);</span>
+        }
+<span class="fc" id="L78">        return instance;</span>
+    }
+
+    /**
+     * Lookup the factory identified by {@code serverName}.
+     *
+     * @param serverName The server name.
+     * @return The factory that creates server objects identified by the server
+     *         name.
+     */
+    public ServerFactory getFactory(final String serverName) {
+<span class="fc" id="L89">        return serverFactoryMapping.get(serverName);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

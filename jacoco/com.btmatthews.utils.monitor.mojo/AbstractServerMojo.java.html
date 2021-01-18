@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractServerMojo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Monitor Thread</a> &gt; <a href="index.source.html" class="el_package">com.btmatthews.utils.monitor.mojo</a> &gt; <span class="el_source">AbstractServerMojo.java</span></div><h1>AbstractServerMojo.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2021 Brian Matthews
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.btmatthews.utils.monitor.mojo;
+
+import com.btmatthews.utils.monitor.Logger;
+import com.btmatthews.utils.monitor.Monitor;
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugins.annotations.Parameter;
+
+/**
+ * Abstract base class for mojos that implement the stop and run goals for plug-ins that use the Monitor framework.
+ *
+ * @author &lt;a href=&quot;mailto:brian@btmatthews.com&quot;&gt;Brian Matthews&lt;/a&gt;
+ * @since 1.1.0
+ */
+<span class="fc" id="L30">public abstract class AbstractServerMojo extends AbstractMojo implements Logger {</span>
+
+    /**
+     * The port to listen on for the monitor commands.
+     */
+    @Parameter(property = &quot;monitor.port&quot;, required = true)
+    private int monitorPort;
+    /**
+     * Key to provide when sending commands to the mail apache.
+     */
+    @Parameter(property = &quot;monitor.key&quot;, required = true)
+    private String monitorKey;
+    /**
+     * The number of times to retry when checking if the server has started or stopped.
+     *
+     * @since 2.1.1
+     */
+    @Parameter(property = &quot;monitor.retryCount&quot;, defaultValue = &quot;3&quot;)
+    private int monitorRetryCount;
+    /**
+     * The delay in milliseconds before retrying the check to see if the server has started or stopped.
+     *
+     * @since 2.1.1
+     */
+    @Parameter(property = &quot;monitor.retryInterval&quot;, defaultValue = &quot;500&quot;)
+    private int monitorRetryInterval;
+
+    /**
+     * Create the monitor object tha is used to control a server.
+     *
+     * @return A {@link Monitor} object.
+     */
+    public Monitor createMonitor() {
+<span class="fc" id="L63">        return new Monitor(monitorKey, monitorPort, monitorRetryCount, monitorRetryInterval);</span>
+    }
+
+    /**
+     * Write an informational message to the plug-in log file.
+     *
+     * @param message The message to be logged.
+     */
+    @Override
+    public void logInfo(final String message) {
+<span class="fc" id="L73">        getLog().info(message);</span>
+<span class="fc" id="L74">    }</span>
+
+    /**
+     * Write an error message to the plug-in log file.
+     *
+     * @param message The message to be logged.
+     */
+    @Override
+    public void logError(final String message) {
+<span class="fc" id="L83">        getLog().error(message);</span>
+<span class="fc" id="L84">    }</span>
+
+    /**
+     * Write an error message to the plug-in log file.
+     *
+     * @param message The message to be logged.
+     * @param cause   The exception that caused the message to be logged.
+     */
+    @Override
+    public void logError(final String message, final Throwable cause) {
+<span class="fc" id="L94">        getLog().error(message, cause);</span>
+<span class="fc" id="L95">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>
